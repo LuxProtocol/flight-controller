@@ -5,6 +5,35 @@
 Adafruit_BNO08x bno08x(BNO08X_RESET);
 sh2_SensorValue_t sensorValue;
 
+// ---------------- Hardware Pins ----------------
+// --- Motor Pins
+#define FL_M 1
+#define FR_M 2
+#define RL_M 3
+#define RR_M 4
+
+// --- IMU I2C Pins
+#define GYRO_SDA 9
+#define GYRO_SCL 10
+
+// --- Status LED Pins
+//#define R_LED = 5;
+//#define G_LED = 6;
+//#define B_LED = 7;
+// ---------------- Hardware Pins ----------------
+
+// ---------------- Debugging ----------------
+#define ENABLE_ROLL_CORRECTION  1
+#define ENABLE_PITCH_CORRECTION 1
+#define ENABLE_YAW_CORRECTION   1
+#define DEBUG_PRINT             1
+// ---------------- Debugging ----------------
+
+// ---------------- Timing ----------------
+TickType_t lastWakeTime;
+const TickType_t periodTicks = pdMS_TO_TICKS(4);
+// ---------------- Timing ----------------
+
 // ---------------- Motor output ----------------
 struct MotorOutputs {
   int FL, FR, RL, RR;
@@ -33,12 +62,6 @@ PIDState rollState  = {0, 150, 250, -250};
 PIDState pitchState = {0, 150, 250, -250};
 PIDState yawState   = {0, 50,  120, -120};
 
-// Debug switches - zero these out to isolate one axis at a time while tuning
-#define ENABLE_ROLL_CORRECTION  1
-#define ENABLE_PITCH_CORRECTION 1
-#define ENABLE_YAW_CORRECTION   1
-#define DEBUG_PRINT             1
-
 // ---------------- Orientation state ----------------
 float currentRoll = 0, currentPitch = 0, currentYaw = 0;
 float gyroRollRate = 0, gyroPitchRate = 0, gyroYawRate = 0;
@@ -48,8 +71,6 @@ bool yawHoldSet = false;
 const int BASE_THROTTLE = 1300;   // hover-ish baseline, tune for your build
 const int MIN_PWM = 1000;
 const int MAX_PWM = 2000;
-const int GYRO_SDA = 9;
-const int GYRO_SCL = 10;
 
 unsigned long lastMicros = 0;
 
@@ -78,14 +99,6 @@ void quatToEuler(float qr, float qi, float qj, float qk,
   roll  = atan2(2.0 * (qj * qk + qi * qr), (-sqi - sqj + sqk + sqr)) * RAD_TO_DEG;
   pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr)) * RAD_TO_DEG;
   yaw   = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr)) * RAD_TO_DEG;
-
-  Serial.print("Orientation: ");
-  Serial.print(yaw, 4);
-  Serial.print(", ");
-  Serial.print(pitch, 4);
-  Serial.print(", ");
-  Serial.print(roll, 4);
-  Serial.println("");
 }
 
 // ---------------- Pull latest sensor data ----------------
@@ -156,17 +169,17 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
   if (errorYaw > 180)  errorYaw -= 360;
   if (errorYaw < -180) errorYaw += 360;
 
-  float rollOut  = ENABLE_ROLL_CORRECTION  ? computePID(errorRoll,  gyroRollRate,  dt, rollGains,  rollState)  : 0;
-  float pitchOut = ENABLE_PITCH_CORRECTION ? computePID(errorPitch, gyroPitchRate, dt, pitchGains, pitchState) : 0;
-  float yawOut   = ENABLE_YAW_CORRECTION   ? computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState)   : 0;
+  float rollOut  = computePID(errorRoll,  gyroRollRate,  dt, rollGains,  rollState);
+  float pitchOut = computePID(errorPitch, gyroPitchRate, dt, pitchGains, pitchState);
+  float yawOut   = computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState);
 
   // X-config motor mixing
   // blue & red: front
   // green & red: right
-  float fl = throttle - pitchOut + rollOut + yawOut; // red/M1 throttle - pitchOut + rollOut + yawOut;
-  float fr = throttle + pitchOut + rollOut - yawOut; // green/M2 throttle + pitchOut + rollOut - yawOut;
-  float rl = throttle + pitchOut - rollOut + yawOut; // blue/M3 throttle - pitchOut - rollOut - yawOut;
-  float rr = throttle - pitchOut - rollOut - yawOut; // yellow/M4 throttle + pitchOut - rollOut + yawOut;
+  float fl = throttle - pitchOut + rollOut + yawOut; // red/M1
+  float fr = throttle + pitchOut + rollOut - yawOut; // green/M2
+  float rl = throttle + pitchOut - rollOut + yawOut; // blue/M3
+  float rr = throttle - pitchOut - rollOut - yawOut; // yellow/M4
 
   MotorOutputs out;
   out.FL = constrain((int)fl, MIN_PWM, MAX_PWM);
@@ -183,6 +196,7 @@ void setup() {
 }
 
 void loop() {
+  lastWakeTime = xTaskGetTickCount();
   // Replace these with real RC/joystick input, normalized to [-1, 1]
   float desiredX = 0.0; // lateral
   float desiredY = 0.0; // forward/back
@@ -190,7 +204,16 @@ void loop() {
 
   MotorOutputs m = computeMotorOutputs(desiredX, desiredY, desiredZ);
 
-  // writeToESC(FL_PIN, m.FL); etc.
+  // Display IMU Readings
+  Serial.print("Orientation: ");
+  Serial.print(currentYaw, 4);
+  Serial.print(", ");
+  Serial.print(currentPitch, 4);
+  Serial.print(", ");
+  Serial.print(currentRoll, 4);
+  Serial.println("");
+
+  // Display Motor Vectors
   Serial.print("Motor: ");
   Serial.print(m.FL); Serial.print(", ");
   Serial.print(m.FR); Serial.print(", ");
@@ -199,5 +222,5 @@ void loop() {
 
 
 
-  delay(5); // ~200Hz loop
+  vTaskDelayUntil(&lastWakeTime, periodTicks); // 250Hz
 }

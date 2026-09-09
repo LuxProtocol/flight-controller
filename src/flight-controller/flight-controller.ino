@@ -1,5 +1,9 @@
 #include <Adafruit_BNO08x.h>
 #include <Arduino.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "driver/ledc.h"
 
 #define BNO08X_RESET -1
 Adafruit_BNO08x bno08x(BNO08X_RESET);
@@ -25,8 +29,10 @@ sh2_SensorValue_t sensorValue;
 // ---------------- Debugging ----------------
 #define ENABLE_ROLL_CORRECTION  1
 #define ENABLE_PITCH_CORRECTION 1
-#define ENABLE_YAW_CORRECTION   1
+#define ENABLE_YAW_CORRECTION   0
 #define DEBUG_PRINT             1
+#define DEBUG_FUNCT             1
+#define ENABLE_MOTORS           1
 // ---------------- Debugging ----------------
 
 // ---------------- Timing ----------------
@@ -68,11 +74,21 @@ float gyroRollRate = 0, gyroPitchRate = 0, gyroYawRate = 0;
 float yawHold = 0;
 bool yawHoldSet = false;
 
-const int BASE_THROTTLE = 1300;   // hover-ish baseline, tune for your build
-const int MIN_PWM = 1000;
-const int MAX_PWM = 2000;
+// ---------------- Motor Control ----------------
+#define PWM_FREQUENCY       250   // Hz
+#define PWM_RESOLUTION      12    // bits  →  0 – 4095
+
+const int BASE_THROTTLE = 1200;   // hover-ish baseline, tune for your build
+#define MIN_PWM             1024
+#define MAX_PWM             2048
+#define OFF_PWM             256
 
 unsigned long lastMicros = 0;
+// ---------------- ^ Variable Settings ^ ----------------
+
+
+
+
 
 // ---------------- BNO085 setup ----------------
 void setupIMU() {
@@ -83,8 +99,41 @@ void setupIMU() {
   bno08x.enableReport(SH2_GYROSCOPE_CALIBRATED, 5000);
   lastMicros = micros();
 }
+// ---------------- BNO085 setup ----------------
 
-// ---------------- Quaternion -> Euler ----------------
+
+
+
+
+// ---------------- ESC setup ----------------
+void setupESC() {
+  ledcAttach(FL_M, PWM_FREQUENCY, PWM_RESOLUTION);
+  ledcAttach(FR_M, PWM_FREQUENCY, PWM_RESOLUTION);
+  ledcAttach(RL_M, PWM_FREQUENCY, PWM_RESOLUTION);
+  ledcAttach(RR_M, PWM_FREQUENCY, PWM_RESOLUTION);
+
+  ledcWrite(FL_M, OFF_PWM);
+  ledcWrite(FR_M, OFF_PWM);
+  ledcWrite(RL_M, OFF_PWM);
+  ledcWrite(RR_M, OFF_PWM);
+
+  vTaskDelay(pdMS_TO_TICKS(250));
+
+  Serial.println("Arming ESCs — keep propellers clear!");
+  ledcWrite(FL_M, MIN_PWM);
+  ledcWrite(FR_M, MIN_PWM);
+  ledcWrite(RL_M, MIN_PWM);
+  ledcWrite(RR_M, MIN_PWM);
+
+  vTaskDelay(pdMS_TO_TICKS(2500));
+  Serial.println("ESCs armed!");
+}
+// ---------------- ESC setup ----------------
+
+
+
+
+
 // ---------------- Quaternion -> Euler ----------------
 void quatToEuler(float qr, float qi, float qj, float qk,
                   float &roll, float &pitch, float &yaw) {
@@ -100,6 +149,11 @@ void quatToEuler(float qr, float qi, float qj, float qk,
   pitch = asin(-2.0 * (qi * qk - qj * qr) / (sqi + sqj + sqk + sqr)) * RAD_TO_DEG;
   yaw   = atan2(2.0 * (qi * qj + qk * qr), (sqi - sqj - sqk + sqr)) * RAD_TO_DEG;
 }
+// ---------------- Quaternion -> Euler ----------------
+
+
+
+
 
 // ---------------- Pull latest sensor data ----------------
 // Returns true if orientation was updated this call.
@@ -124,6 +178,7 @@ bool readIMU() {
   }
   return updated;
 }
+// ---------------- Pull latest sensor data ----------------
 
 void resetYawHold() {
   yawHold = currentYaw;
@@ -144,6 +199,11 @@ float computePID(float error, float measuredRate, float dt,
   output = constrain(output, s.outputMin, s.outputMax);
   return output;
 }
+// ---------------- Core PID (derivative on measured rate) ----------------
+
+
+
+
 
 // ---------------- Main entry point ----------------
 // desiredX/Y/Z in range roughly [-1, 1] (e.g. from joystick/RC, normalized)
@@ -171,7 +231,7 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
 
   float rollOut  = computePID(errorRoll,  gyroRollRate,  dt, rollGains,  rollState);
   float pitchOut = computePID(errorPitch, gyroPitchRate, dt, pitchGains, pitchState);
-  float yawOut   = computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState);
+  float yawOut   = ENABLE_YAW_CORRECTION ? computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState) : 0;
 
   // X-config motor mixing
   // blue & red: front
@@ -188,11 +248,25 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
   out.RR = constrain((int)rr, MIN_PWM, MAX_PWM);
   return out;
 }
+// ---------------- Main entry point ----------------
 
-// ---------------- Example usage ----------------
+
+
+
+
+// ---------------- System Management ----------------
 void setup() {
   Serial.begin(115200);
   setupIMU();
+  setupESC();
+
+
+  #ifdef DEBUG_FUNCT
+    // Debug functionality - for safety
+    Serial.println("Press ENTER in the Serial Monitor to continue...");
+    //while(Serial.available() > 0) { Serial.read(); }
+    Serial.println("Input received! Starting code...");
+  #endif
 }
 
 void loop() {
@@ -204,23 +278,34 @@ void loop() {
 
   MotorOutputs m = computeMotorOutputs(desiredX, desiredY, desiredZ);
 
-  // Display IMU Readings
-  Serial.print("Orientation: ");
-  Serial.print(currentYaw, 4);
-  Serial.print(", ");
-  Serial.print(currentPitch, 4);
-  Serial.print(", ");
-  Serial.print(currentRoll, 4);
-  Serial.println("");
+  // Write PWM to ESCs
+  #ifdef ENABLE_MOTORS
+    ledcWrite(FL_M, m.FL);
+    ledcWrite(FR_M, m.FR);
+    ledcWrite(RL_M, m.RL);
+    ledcWrite(RR_M, m.RR);
+  #endif
 
-  // Display Motor Vectors
-  Serial.print("Motor: ");
-  Serial.print(m.FL); Serial.print(", ");
-  Serial.print(m.FR); Serial.print(", ");
-  Serial.print(m.RL); Serial.print(", ");
-  Serial.println(m.RR);
+  #ifdef DEBUG_PRINT
+    // Display IMU Readings
+    Serial.print("Orientation: ");
+    Serial.print(currentYaw, 4);
+    Serial.print(", ");
+    Serial.print(currentPitch, 4);
+    Serial.print(", ");
+    Serial.print(currentRoll, 4);
+    Serial.println("");
+
+    // Display Motor Vectors
+    Serial.print("Motor: ");
+    Serial.print(m.FL); Serial.print(", ");
+    Serial.print(m.FR); Serial.print(", ");
+    Serial.print(m.RL); Serial.print(", ");
+    Serial.println(m.RR);
+  #endif
 
 
 
-  vTaskDelayUntil(&lastWakeTime, periodTicks); // 250Hz
+  vTaskDelayUntil(&lastWakeTime, periodTicks); // 200Hz
 }
+// ---------------- System Management ----------------

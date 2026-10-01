@@ -17,8 +17,8 @@ sh2_SensorValue_t sensorValue;
 #define RR_M 4
 
 // --- IMU I2C Pins
-#define GYRO_SDA 9
-#define GYRO_SCL 10
+#define GYRO_SDA 9      //QWIIC - Blue
+#define GYRO_SCL 10     //QWIIC - Yellow
 
 // --- Status LED Pins
 //#define R_LED = 5;

@@ -11,14 +11,14 @@ sh2_SensorValue_t sensorValue;
 
 // ---------------- Hardware Pins ----------------
 // --- Motor Pins
-#define FL_M 1
-#define FR_M 2
-#define RL_M 3
-#define RR_M 4
+#define FL_M 39
+#define FR_M 38
+#define RL_M 36
+#define RR_M 37
 
 // --- IMU I2C Pins
-#define GYRO_SDA 9
-#define GYRO_SCL 10
+#define GYRO_SDA 9      //QWIIC - Blue
+#define GYRO_SCL 10     //QWIIC - Yellow
 
 // --- Status LED Pins
 //#define R_LED = 5;
@@ -31,7 +31,7 @@ sh2_SensorValue_t sensorValue;
 #define ENABLE_PITCH_CORRECTION 1
 #define ENABLE_YAW_CORRECTION   0
 #define DEBUG_PRINT             1
-#define DEBUG_FUNCT             1
+#define DEBUG_FUNCT             0
 #define ENABLE_MOTORS           1
 // ---------------- Debugging ----------------
 

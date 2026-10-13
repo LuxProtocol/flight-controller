@@ -49,8 +49,8 @@ struct MotorOutputs {
 struct PIDGains { float kp, ki, kd; };
 
 // Start LOW. Bring these up gradually while testing (see tuning notes below).
-PIDGains rollGains  = {5.0, 0.3, 0.3};
-PIDGains pitchGains = {5.0, 0.3, 0.3};
+PIDGains rollGains  = {1.5, 0.15, 0.15};
+PIDGains pitchGains = {1.5, 0.15, 0.15};
 PIDGains yawGains   = {0.6, 0.0, 0.0};
 
 // ---------------- PID persistent state ----------------
@@ -78,9 +78,9 @@ bool yawHoldSet = false;
 #define PWM_FREQUENCY       250   // Hz
 #define PWM_RESOLUTION      12    // bits  →  0 – 4095
 
-const int BASE_THROTTLE = 1200;   // hover-ish baseline, tune for your build
-#define MIN_PWM             1024
-#define MAX_PWM             2048
+const int BASE_THROTTLE = 1450;   // hover-ish baseline, tune for your build
+#define MIN_PWM             1138
+#define MAX_PWM             2512
 #define OFF_PWM             256
 
 unsigned long lastMicros = 0;

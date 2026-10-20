@@ -30,28 +30,27 @@ sh2_SensorValue_t sensorValue;
 #define ENABLE_ROLL_CORRECTION  1
 #define ENABLE_PITCH_CORRECTION 1
 #define ENABLE_YAW_CORRECTION   0
-#define DEBUG_PRINT             1
+#define DEBUG_PRINT             0
 #define DEBUG_FUNCT             0
 #define ENABLE_MOTORS           1
 // ---------------- Debugging ----------------
 
 // ---------------- Timing ----------------
 TickType_t lastWakeTime;
-const TickType_t periodTicks = pdMS_TO_TICKS(4);
+const TickType_t periodTicks = pdMS_TO_TICKS(10);
 // ---------------- Timing ----------------
 
 // ---------------- Motor output ----------------
-struct MotorOutputs {
-  int FL, FR, RL, RR;
-};
+struct MotorOutputs { int FL, FR, RL, RR; };
 
 // ---------------- PID gains ----------------
 struct PIDGains { float kp, ki, kd; };
 
-// Start LOW. Bring these up gradually while testing (see tuning notes below).
-PIDGains rollGains  = {1.5, 0.15, 0.15};
-PIDGains pitchGains = {1.5, 0.15, 0.15};
+PIDGains rollGains  = {1.7, 0.15, 0.3};
+PIDGains pitchGains = {1.7, 0.15, 0.3};
 PIDGains yawGains   = {0.6, 0.0, 0.0};
+#define ROLL_TRIM     0.0
+#define PITCH_TRIM    0.0
 
 // ---------------- PID persistent state ----------------
 // IMPORTANT: yaw gets a much smaller output ceiling than roll/pitch.
@@ -73,15 +72,16 @@ float currentRoll = 0, currentPitch = 0, currentYaw = 0;
 float gyroRollRate = 0, gyroPitchRate = 0, gyroYawRate = 0;
 float yawHold = 0;
 bool yawHoldSet = false;
+int counter = 0;
 
 // ---------------- Motor Control ----------------
-#define PWM_FREQUENCY       250   // Hz
-#define PWM_RESOLUTION      12    // bits  →  0 – 4095
+#define PWM_FREQUENCY     250   // Hz
+#define PWM_RESOLUTION    12    // bits  →  0 – 4095
 
-const int BASE_THROTTLE = 1450;   // hover-ish baseline, tune for your build
-#define MIN_PWM             1138
-#define MAX_PWM             2512
-#define OFF_PWM             256
+const int BASE_THROTTLE = 1490;   // hover-ish baseline, tune for your build
+#define MIN_PWM           1138
+#define MAX_PWM           2512
+#define OFF_PWM           256
 
 unsigned long lastMicros = 0;
 // ---------------- ^ Variable Settings ^ ----------------
@@ -195,9 +195,7 @@ float computePID(float error, float measuredRate, float dt,
 
   float D = -g.kd * measuredRate;
 
-  float output = P + I + D;
-  output = constrain(output, s.outputMin, s.outputMax);
-  return output;
+  return constrain(P + I + D, s.outputMin, s.outputMax);
 }
 // ---------------- Core PID (derivative on measured rate) ----------------
 
@@ -219,8 +217,8 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
   lastMicros = now;
 
   // Map desired movement -> target angles / throttle
-  float targetRoll  = constrain(desiredX, -1.0, 1.0) * maxTiltDeg;
-  float targetPitch = constrain(desiredY, -1.0, 1.0) * maxTiltDeg;
+  float targetRoll  = constrain(desiredX, -1.0, 1.0) * maxTiltDeg + ROLL_TRIM;
+  float targetPitch = constrain(desiredY, -1.0, 1.0) * maxTiltDeg + PITCH_TRIM;
   float throttle     = BASE_THROTTLE + constrain(desiredZ, -1.0, 1.0) * maxClimbPWM;
 
   float errorRoll  = targetRoll  - currentRoll;
@@ -231,7 +229,7 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
 
   float rollOut  = computePID(errorRoll,  gyroRollRate,  dt, rollGains,  rollState);
   float pitchOut = computePID(errorPitch, gyroPitchRate, dt, pitchGains, pitchState);
-  float yawOut   = ENABLE_YAW_CORRECTION ? computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState) : 0;
+  float yawOut   = 0; //computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState);
 
   // X-config motor mixing
   // blue & red: front
@@ -287,6 +285,8 @@ void loop() {
   #endif
 
   #ifdef DEBUG_PRINT
+    if(counter>10){
+    counter=0;
     // Display IMU Readings
     Serial.print("Orientation: ");
     Serial.print(currentYaw, 4);
@@ -302,8 +302,9 @@ void loop() {
     Serial.print(m.FR); Serial.print(", ");
     Serial.print(m.RL); Serial.print(", ");
     Serial.println(m.RR);
+    }
+    counter++;
   #endif
-
 
 
   vTaskDelayUntil(&lastWakeTime, periodTicks); // 200Hz

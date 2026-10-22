@@ -4,6 +4,7 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "driver/ledc.h"
+#include <stdarg.h>
 
 #define BNO08X_RESET -1
 Adafruit_BNO08x bno08x(BNO08X_RESET);
@@ -11,10 +12,10 @@ sh2_SensorValue_t sensorValue;
 
 // ---------------- Hardware Pins ----------------
 // --- Motor Pins
-#define FL_M 1
-#define FR_M 2
-#define RL_M 3
-#define RR_M 4
+#define FL_M 39
+#define FR_M 38
+#define RL_M 36
+#define RR_M 37
 
 // --- IMU I2C Pins
 #define GYRO_SDA 9      //QWIIC - Blue
@@ -30,14 +31,14 @@ sh2_SensorValue_t sensorValue;
 #define ENABLE_ROLL_CORRECTION      1
 #define ENABLE_PITCH_CORRECTION     1
 #define ENABLE_YAW_CORRECTION       0
-#define DEBUG_PRINT                 1
+#define DEBUG_PRINT                 0
 #define ENABLE_SERIAL_CMDS          1
 #define ENABLE_MOTORS               1
 // ---------------- Debugging ----------------
 
 // ---------------- Timing ----------------
 TickType_t lastWakeTime;
-const TickType_t periodTicks = pdMS_TO_TICKS(4);
+const TickType_t periodTicks = pdMS_TO_TICKS(10);
 // ---------------- Timing ----------------
 
 // ---------------- Motor output ----------------
@@ -48,10 +49,11 @@ struct MotorOutputs {
 // ---------------- PID gains ----------------
 struct PIDGains { float kp, ki, kd; };
 
-// Start LOW. Bring these up gradually while testing (see tuning notes below).
-PIDGains rollGains  = {5.0, 0.3, 0.3};
-PIDGains pitchGains = {5.0, 0.3, 0.3};
+PIDGains rollGains  = {1.7, 0.15, 0.3};
+PIDGains pitchGains = {1.7, 0.15, 0.3};
 PIDGains yawGains   = {0.6, 0.0, 0.0};
+#define ROLL_TRIM     0.0
+#define PITCH_TRIM    0.0
 
 // ---------------- PID persistent state ----------------
 // IMPORTANT: yaw gets a much smaller output ceiling than roll/pitch.
@@ -73,15 +75,16 @@ float currentRoll = 0, currentPitch = 0, currentYaw = 0;
 float gyroRollRate = 0, gyroPitchRate = 0, gyroYawRate = 0;
 float yawHold = 0;
 bool yawHoldSet = false;
+int counter = 0;
 
 // ---------------- Motor Control ----------------
 #define PWM_FREQUENCY       250   // Hz
 #define PWM_RESOLUTION      12    // bits  →  0 – 4095
 
-const int BASE_THROTTLE = 1200;   // hover-ish baseline, tune for your build
-#define MIN_PWM             1024
-#define MAX_PWM             2048
-#define OFF_PWM             256
+const int BASE_THROTTLE = 1490;   // hover-ish baseline, tune for your build
+#define MIN_PWM           1138
+#define MAX_PWM           2512
+#define OFF_PWM           256
 
 unsigned long lastMicros = 0;
 
@@ -90,10 +93,22 @@ TaskHandle_t FlightThread = NULL;
 TaskHandle_t CLIThread = NULL;
 //TaskHandle_t taskFloat2Handle = NULL;
 
+
+
+// ---------------- loggin stuff ----------------
+
+constexpr size_t LOG_MSG_LEN   = 128;  // max chars per message
+constexpr size_t LOG_QUEUE_LEN = 64;   // messages buffered (~8 KB total)
+
+struct LogMsg {
+  char text[LOG_MSG_LEN];
+};
+
+static QueueHandle_t logQueue;
+static uint32_t droppedLogs = 0;
+
+
 // ---------------- ^ Variable Settings ^ ----------------
-
-
-
 
 
 // ---------------- BNO085 setup ----------------
@@ -200,38 +215,9 @@ float computePID(float error, float measuredRate, float dt,
 
   float D = -g.kd * measuredRate;
 
-  float output = P + I + D;
-  output = constrain(output, s.outputMin, s.outputMax);
-  return output;
+  return constrain(P + I + D, s.outputMin, s.outputMax);
 }
 // ---------------- Core PID (derivative on measured rate) ----------------
-
-
-
-
-
-// ---------------- Thread Health Check ----------------
-void checkTaskAlive(TaskHandle_t handle, const char* name) {
-  if (handle == NULL) {
-    Serial.printf("[%s] Handle is NULL — task was never created or was deleted\n", name);
-    return;
-  }
-
-  eTaskState state = eTaskGetState(handle);
-  const char* stateStr;
-  switch (state) {
-    case eRunning:   stateStr = "Running"; break;
-    case eReady:     stateStr = "Ready"; break;
-    case eBlocked:   stateStr = "Blocked"; break;
-    case eSuspended: stateStr = "Suspended"; break;
-    case eDeleted:   stateStr = "Deleted"; break;
-    default:         stateStr = "Unknown"; break;
-  }
-  Serial.printf("[%s] State: %s\n", name, stateStr);
-}
-// ---------------- Thread Health Check ----------------
-
-
 
 
 
@@ -261,7 +247,7 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
 
   float rollOut  = computePID(errorRoll,  gyroRollRate,  dt, rollGains,  rollState);
   float pitchOut = computePID(errorPitch, gyroPitchRate, dt, pitchGains, pitchState);
-  float yawOut   = ENABLE_YAW_CORRECTION ? computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState) : 0;
+  float yawOut   = 0; //ENABLE_YAW_CORRECTION ? computePID(errorYaw,   gyroYawRate,   dt, yawGains,   yawState) : 0;
 
   // X-config motor mixing
   // blue & red: front
@@ -282,15 +268,63 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
 
 
 
+// ---------------- Thread Health Check ----------------
+void checkTaskAlive(TaskHandle_t handle, const char* name) {
+  if (handle == NULL) {
+    Serial.printf("[%s] Handle is NULL — task was never created or was deleted\n", name);
+    return;
+  }
+
+  eTaskState state = eTaskGetState(handle);
+  const char* stateStr;
+  switch (state) {
+    case eRunning:   stateStr = "Running"; break;
+    case eReady:     stateStr = "Ready"; break;
+    case eBlocked:   stateStr = "Blocked"; break;
+    case eSuspended: stateStr = "Suspended"; break;
+    case eDeleted:   stateStr = "Deleted"; break;
+    default:         stateStr = "Unknown"; break;
+  }
+  Serial.printf("[%s] State: %s\n", name, stateStr);
+}
+// ---------------- Thread Health Check ----------------
+
 
 
 // ---------------- CommandLineInterface Thread ----------------
+void logf(const char *fmt, ...) {
+  LogMsg msg;
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(msg.text, sizeof(msg.text), fmt, args);
+  va_end(args);
+
+  // Timeout of 0 = never block the caller; drop the message if the queue is full
+  if (xQueueSend(logQueue, &msg, 0) != pdTRUE) {
+    __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
+  }
+}
+
 #ifdef ENABLE_SERIAL_CMDS
 void commandLineInterface(void *pvParameters) {
+  LogMsg msg;
   for (;;) {
-    if (Serial.available() > 0) {
-      String command = Serial.readStringUntil('\n');
-      command.trim(); // Remove whitespace
+    //  Print to serial
+    if (xQueueReceive(logQueue, &msg, pdMS_TO_TICKS(10)) == pdTRUE) {
+      Serial.println(msg.text);
+      while (xQueueReceive(logQueue, &msg, 0) == pdTRUE) {
+        Serial.println(msg.text);
+      }
+    }
+
+    //  Count messages not sent
+    uint32_t dropped = __atomic_exchange_n(&droppedLogs, 0, __ATOMIC_RELAXED);
+    if (dropped) Serial.printf("[logger] dropped %u messages\n", dropped);
+
+    // --- Input: handle incoming serial data ---
+    while (Serial.available()) {
+      char c = Serial.read();
+      // build a line buffer, parse commands, etc.
     }
   }
 }
@@ -303,6 +337,7 @@ void commandLineInterface(void *pvParameters) {
 
 // ---------------- FlightController Thread ----------------
 void flightController(void *pvParameters) {
+  for(;;){
   lastWakeTime = xTaskGetTickCount();
   // Replace these with real RC/joystick input, normalized to [-1, 1]
   float desiredX = 0.0; // lateral
@@ -320,26 +355,21 @@ void flightController(void *pvParameters) {
   #endif
 
   #ifdef DEBUG_PRINT
+    if(counter>10){
+    counter=0;
     // Display IMU Readings
-    Serial.print("Orientation: ");
-    Serial.print(currentYaw, 4);
-    Serial.print(", ");
-    Serial.print(currentPitch, 4);
-    Serial.print(", ");
-    Serial.print(currentRoll, 4);
-    Serial.println("");
+    logf("Orientation: %.4f, %.4f, %.4f", currentYaw, currentPitch, currentRoll);
 
     // Display Motor Vectors
-    Serial.print("Motor: ");
-    Serial.print(m.FL); Serial.print(", ");
-    Serial.print(m.FR); Serial.print(", ");
-    Serial.print(m.RL); Serial.print(", ");
-    Serial.println(m.RR);
+    logf("Motor: %d, %d, %d, %d", m.FL, m.FR, m.RL, m.RR);
+    }
+    counter++;
   #endif
 
 
 
   vTaskDelayUntil(&lastWakeTime, periodTicks); // 200Hz
+  }
 }
 // ---------------- FlightController Thread ----------------
 
@@ -355,6 +385,7 @@ void setup() {
 
   // Serial Thread
   #ifdef ENABLE_SERIAL_CMDS
+    logQueue = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
     xTaskCreate(
       commandLineInterface,         // task function
       "CommandLineInterface",       // name
@@ -383,8 +414,8 @@ void setup() {
 
 void loop() {
   vTaskDelay(2500); // 2.5 Seconds
-  checkTaskAlive(CLIThread, " CLI ");
-  checkTaskAlive(FlightThread, " Flight ");
+  checkTaskAlive(CLIThread, " [CLI] ");
+  checkTaskAlive(FlightThread, " [Flight] ");
 
   // --- Maybe add LED stuff here? ---
 }

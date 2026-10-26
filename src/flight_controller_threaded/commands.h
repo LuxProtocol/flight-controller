@@ -19,6 +19,11 @@ static void cmdReboot(int, char **) {
   ESP.restart();
 }
 
+static void cmdEcho(int argc, char **argv) {
+  for (int i = 1; i < argc; i++) Serial.printf("%s ", argv[i]);
+  Serial.print("\n");
+}
+
 // ---------- Command table ----------
 struct Command {
   const char *name;
@@ -30,6 +35,7 @@ static const Command commands[] = {
   {"help",     "list commands",         cmdHelp},
   {"status",   "show system status",    cmdStatus},
   {"reboot",   "restart the chip",      cmdReboot},
+  {"echo", "echo text back", cmdEcho},
 };
 
 static void cmdHelp(int, char **) {

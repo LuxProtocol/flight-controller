@@ -6,6 +6,9 @@
 #include "driver/ledc.h"
 #include <stdarg.h>
 
+// commands
+#include "commands.h"
+
 #define BNO08X_RESET -1
 Adafruit_BNO08x bno08x(BNO08X_RESET);
 sh2_SensorValue_t sensorValue;
@@ -96,17 +99,15 @@ TaskHandle_t CLIThread = NULL;
 
 
 // ---------------- loggin stuff ----------------
-
+// --- Print
 constexpr size_t LOG_MSG_LEN   = 128;  // max chars per message
 constexpr size_t LOG_QUEUE_LEN = 64;   // messages buffered (~8 KB total)
+constexpr size_t CMD_LINE_LEN  = 64;
 
-struct LogMsg {
-  char text[LOG_MSG_LEN];
-};
+struct LogMsg { char text[LOG_MSG_LEN]; };
 
 static QueueHandle_t logQueue;
 static uint32_t droppedLogs = 0;
-
 
 // ---------------- ^ Variable Settings ^ ----------------
 
@@ -308,8 +309,12 @@ void logf(const char *fmt, ...) {
 #ifdef ENABLE_SERIAL_CMDS
 void commandLineInterface(void *pvParameters) {
   LogMsg msg;
+  char   line[CMD_LINE_LEN];
+  size_t len = 0;
+  bool   overflow = false;
+
   for (;;) {
-    //  Print to serial
+    // --- Print to serial ---
     if (xQueueReceive(logQueue, &msg, pdMS_TO_TICKS(10)) == pdTRUE) {
       Serial.println(msg.text);
       while (xQueueReceive(logQueue, &msg, 0) == pdTRUE) {
@@ -317,14 +322,28 @@ void commandLineInterface(void *pvParameters) {
       }
     }
 
-    //  Count messages not sent
+    // --- Count messages not sent ---
     uint32_t dropped = __atomic_exchange_n(&droppedLogs, 0, __ATOMIC_RELAXED);
     if (dropped) Serial.printf("[logger] dropped %u messages\n", dropped);
 
-    // --- Input: handle incoming serial data ---
+    // --- Handle incoming serial data ---
     while (Serial.available()) {
       char c = Serial.read();
-      // build a line buffer, parse commands, etc.
+      if (c == '\r' || c == '\n') {
+        if (overflow) {
+          Serial.print("[error] line too long, discarded\n");
+        } else if (len > 0) {
+          line[len] = '\0';
+          dispatchCommand(line);
+        }
+        len = 0;
+        overflow = false;
+      } else if (c == 0x08 || c == 0x7F) {          // backspace / delete
+        if (len > 0) len--;
+      } else if (isprint((unsigned char)c)) {
+        if (len < CMD_LINE_LEN - 1) line[len++] = c;
+        else overflow = true;
+      }
     }
   }
 }
@@ -386,13 +405,14 @@ void setup() {
   // Serial Thread
   #ifdef ENABLE_SERIAL_CMDS
     logQueue = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
       commandLineInterface,         // task function
       "CommandLineInterface",       // name
       4096,                         // stack size (bytes) — increase if stack overflow occurs
       NULL,                         // parameter
       1,                            // priority (higher = more urgent; was 1)
-      &CLIThread                    // handle
+      &CLIThread,                   // handle
+      0                             // core
     );
   #endif
 
@@ -414,8 +434,8 @@ void setup() {
 
 void loop() {
   vTaskDelay(2500); // 2.5 Seconds
-  checkTaskAlive(CLIThread, " [CLI] ");
-  checkTaskAlive(FlightThread, " [Flight] ");
+  //checkTaskAlive(CLIThread, " [CLI] ");
+  //checkTaskAlive(FlightThread, " [Flight] ");
 
   // --- Maybe add LED stuff here? ---
 }

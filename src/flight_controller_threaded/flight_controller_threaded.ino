@@ -49,8 +49,8 @@ struct MotorOutputs {
 // ---------------- PID gains ----------------
 struct PIDGains { float kp, ki, kd; };
 
-PIDGains rollGains  = {1.7, 0.15, 0.3};
-PIDGains pitchGains = {1.7, 0.15, 0.3};
+PIDGains rollGains  = {1.7, 0.15, 0.35};
+PIDGains pitchGains = {1.7, 0.15, 0.35};
 PIDGains yawGains   = {0.6, 0.0, 0.0};
 #define ROLL_TRIM     0.0
 #define PITCH_TRIM    0.0
@@ -81,7 +81,7 @@ int counter = 0;
 #define PWM_FREQUENCY       250   // Hz
 #define PWM_RESOLUTION      12    // bits  →  0 – 4095
 
-const int BASE_THROTTLE = 1490;   // hover-ish baseline, tune for your build
+const int BASE_THROTTLE = 1500;   // hover-ish baseline, tune for your build
 #define MIN_PWM           1138
 #define MAX_PWM           2512
 #define OFF_PWM           256
@@ -324,7 +324,6 @@ void commandLineInterface(void *pvParameters) {
     // --- Input: handle incoming serial data ---
     while (Serial.available()) {
       char c = Serial.read();
-      // build a line buffer, parse commands, etc.
     }
   }
 }
@@ -337,14 +336,17 @@ void commandLineInterface(void *pvParameters) {
 
 // ---------------- FlightController Thread ----------------
 void flightController(void *pvParameters) {
-  for(;;){
-  lastWakeTime = xTaskGetTickCount();
-  // Replace these with real RC/joystick input, normalized to [-1, 1]
+  MotorOutputs m;
+
   float desiredX = 0.0; // lateral
   float desiredY = 0.0; // forward/back
   float desiredZ = 0.0; // vertical
 
-  MotorOutputs m = computeMotorOutputs(desiredX, desiredY, desiredZ);
+  for(;;){
+  lastWakeTime = xTaskGetTickCount();
+  // Replace these with real RC/joystick input, normalized to [-1, 1]
+
+  m = computeMotorOutputs(desiredX, desiredY, desiredZ);
 
   // Write PWM to ESCs
   #ifdef ENABLE_MOTORS
@@ -365,8 +367,6 @@ void flightController(void *pvParameters) {
     }
     counter++;
   #endif
-
-
 
   vTaskDelayUntil(&lastWakeTime, periodTicks); // 200Hz
   }
@@ -414,8 +414,8 @@ void setup() {
 
 void loop() {
   vTaskDelay(2500); // 2.5 Seconds
-  checkTaskAlive(CLIThread, " [CLI] ");
-  checkTaskAlive(FlightThread, " [Flight] ");
+  checkTaskAlive(CLIThread, " CLI ");
+  checkTaskAlive(FlightThread, " Flight ");
 
   // --- Maybe add LED stuff here? ---
 }

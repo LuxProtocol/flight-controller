@@ -5,6 +5,7 @@
 #include "freertos/semphr.h"
 #include "driver/ledc.h"
 #include <stdarg.h>
+#include <string.h>
 
 // commands
 #include "commands.h"
@@ -79,12 +80,14 @@ float gyroRollRate = 0, gyroPitchRate = 0, gyroYawRate = 0;
 float yawHold = 0;
 bool yawHoldSet = false;
 int counter = 0;
+bool armed = false;
+bool debug = true;
 
 // ---------------- Motor Control ----------------
 #define PWM_FREQUENCY       250   // Hz
 #define PWM_RESOLUTION      12    // bits  →  0 – 4095
 
-const int BASE_THROTTLE = 1500;   // hover-ish baseline, tune for your build
+int throttle_pwm = 1500;   // hover-ish baseline, tune for your build
 #define MIN_PWM           1138
 #define MAX_PWM           2512
 #define OFF_PWM           256
@@ -220,7 +223,25 @@ float computePID(float error, float measuredRate, float dt,
 }
 // ---------------- Core PID (derivative on measured rate) ----------------
 
-
+// ---------------- Throttle Control ----------------
+static void cmdThrottle(int argc, char **argv) {
+  if(strcasecmp(argv[1], "up")==0) throttle_pwm+=5;
+  else if(strcasecmp(argv[1], "down")==0) throttle_pwm-=5;
+  else {Serial.printf("Invalid input: %s\n", argv[1]); return;}
+  Serial.printf("Throttle Changed to %d\n", throttle_pwm);
+}
+static void cmdESC(int argc, char **argv) {
+  if(strcasecmp(argv[1], "arm")==0) armed=true;
+  else if(strcasecmp(argv[1], "disarm")==0) armed=false;
+  else {Serial.printf("Invalid input: %s\n", argv[1]); return;}
+  Serial.printf("ESCs have been %sed\n", argv[1]);
+}
+static void cmdDebug(int argc, char **argv) {
+  if(strcasecmp(argv[1], "on")==0) debug=true;
+  else if(strcasecmp(argv[1], "off")==0) debug=false;
+  else Serial.printf("Invalid input: %s\n", argv[1]);
+}
+// ---------------- Throttle Control ----------------
 
 // ---------------- Main entry point ----------------
 // desiredX/Y/Z in range roughly [-1, 1] (e.g. from joystick/RC, normalized)
@@ -238,7 +259,7 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
   // Map desired movement -> target angles / throttle
   float targetRoll  = constrain(desiredX, -1.0, 1.0) * maxTiltDeg;
   float targetPitch = constrain(desiredY, -1.0, 1.0) * maxTiltDeg;
-  float throttle     = BASE_THROTTLE + constrain(desiredZ, -1.0, 1.0) * maxClimbPWM;
+  float throttle     = throttle_pwm + constrain(desiredZ, -1.0, 1.0) * maxClimbPWM;
 
   float errorRoll  = targetRoll  - currentRoll;
   float errorPitch = targetPitch - currentPitch;
@@ -259,10 +280,10 @@ MotorOutputs computeMotorOutputs(float desiredX, float desiredY, float desiredZ,
   float rr = throttle - pitchOut - rollOut - yawOut; // yellow/M4
 
   MotorOutputs out;
-  out.FL = constrain((int)fl, MIN_PWM, MAX_PWM);
-  out.FR = constrain((int)fr, MIN_PWM, MAX_PWM);
-  out.RL = constrain((int)rl, MIN_PWM, MAX_PWM);
-  out.RR = constrain((int)rr, MIN_PWM, MAX_PWM);
+  out.FL = armed ? constrain((int)fl, MIN_PWM, MAX_PWM) : 0;
+  out.FR = armed ? constrain((int)fr, MIN_PWM, MAX_PWM) : 0;
+  out.RL = armed ? constrain((int)rl, MIN_PWM, MAX_PWM) : 0;
+  out.RR = armed ? constrain((int)rr, MIN_PWM, MAX_PWM) : 0;
   return out;
 }
 // ---------------- Main entry point ----------------
@@ -378,12 +399,14 @@ void flightController(void *pvParameters) {
 
   #ifdef DEBUG_PRINT
     if(counter>10){
-    counter=0;
-    // Display IMU Readings
-    logf("Orientation: %.4f, %.4f, %.4f", currentYaw, currentPitch, currentRoll);
+      counter=0;
+      if(debug){
+        // Display IMU Readings
+        logf("Orientation: %.4f, %.4f, %.4f", currentYaw, currentPitch, currentRoll);
 
-    // Display Motor Vectors
-    logf("Motor: %d, %d, %d, %d", m.FL, m.FR, m.RL, m.RR);
+        // Display Motor Vectors
+        logf("Motor: %d, %d, %d, %d", m.FL, m.FR, m.RL, m.RR);
+      }
     }
     counter++;
   #endif
@@ -437,7 +460,6 @@ void loop() {
   vTaskDelay(2500); // 2.5 Seconds
   //checkTaskAlive(CLIThread, " [CLI] ");
   //checkTaskAlive(FlightThread, " [Flight] ");
-
   // --- Maybe add LED stuff here? ---
 }
 // ---------------- System Management ----------------

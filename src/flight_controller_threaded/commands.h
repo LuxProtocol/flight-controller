@@ -5,6 +5,11 @@
 
 constexpr int MAX_ARGS = 8;
 
+// --- Functions in main.ino --- //
+static void cmdThrottle(int argc, char **argv);
+static void cmdESC(int argc, char **argv);
+static void cmdDebug(int argc, char **argv);
+// ----------------------------- //
 
 static void cmdHelp(int argc, char **argv);
 
@@ -27,20 +32,24 @@ static void cmdEcho(int argc, char **argv) {
 // ---------- Command table ----------
 struct Command {
   const char *name;
+  const char *options;
   const char *help;
   void (*fn)(int argc, char **argv);
 };
 
 static const Command commands[] = {
-  {"help",     "list commands",         cmdHelp},
-  {"status",   "show system status",    cmdStatus},
-  {"reboot",   "restart the chip",      cmdReboot},
-  {"echo", "echo text back", cmdEcho},
+  {"help",      "",               "list commands",                  cmdHelp},
+  {"status",    "",               "show system status",             cmdStatus},
+  {"reboot",    "",               "restart the chip",               cmdReboot},
+  {"echo",      "[text]",         "echo text back",                 cmdEcho},
+  {"throttle",  "[up/down]",      "change throttle",                cmdThrottle},
+  {"esc",       "[arm/disarm]",   "arm/disarm ESCs",                cmdESC},
+  {"debug",     "[on/off]",       "enable/disable debugging",       cmdDebug},
 };
 
 static void cmdHelp(int, char **) {
-  Serial.printf("\nusage: [option] ...\n");
-  for (const auto &c : commands) Serial.printf("  %-10s %s\n", c.name, c.help);
+  Serial.printf("\nusage: [command] [option] ...\n");
+  for (const auto &c : commands) Serial.printf("  %-10s %-20s %s\n", c.name, c.options, c.help);
 }
 
 // ---------- Tokenize + dispatch (modifies `line` in place) ----------

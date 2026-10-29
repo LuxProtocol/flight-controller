@@ -113,7 +113,8 @@ constexpr size_t CMD_LINE_LEN  = 64;
 
 struct LogMsg { char text[LOG_MSG_LEN]; };
 
-static QueueHandle_t logQueue;
+static QueueHandle_t logQueueCMD;
+static QueueHandle_t logQueueWEB;
 static uint32_t droppedLogs = 0;
 #define CMD_MAX 128
 
@@ -338,10 +339,14 @@ void logf(const char *fmt, ...) {
   va_end(args);
 
   // Timeout of 0 = never block the caller; drop the message if the queue is full
-  if (xQueueSend(logQueue, &msg, 0) != pdTRUE) {
+  if (xQueueSend(logQueueCMD, &msg, 0) != pdTRUE) {
+    __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
+  }
+  if (xQueueSend(logQueueWEB, &msg, 0) != pdTRUE) {
     __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
   }
 }
+
 
 #ifdef ENABLE_SERIAL_CMDS
 void commandLineInterface(void *pvParameters) {
@@ -352,9 +357,9 @@ void commandLineInterface(void *pvParameters) {
 
   for (;;) {
     // --- Print to serial ---
-    if (xQueueReceive(logQueue, &msg, pdMS_TO_TICKS(10)) == pdTRUE) {
+    if (xQueueReceive(logQueueCMD, &msg, pdMS_TO_TICKS(10)) == pdTRUE) {
       Serial.println(msg.text);
-      while (xQueueReceive(logQueue, &msg, 0) == pdTRUE) {
+      while (xQueueReceive(logQueueCMD, &msg, 0) == pdTRUE) {
         Serial.println(msg.text);
       }
     }
@@ -444,6 +449,7 @@ void setup() {
   temperature_sensor_install(&temp_sensor_config, &temp_handle);
 
   #ifdef ENABLE_WEB
+    logQueueWEB = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
     xTaskCreate(
       webApplication,               // task function
       "WebApplication",             // name
@@ -456,7 +462,7 @@ void setup() {
 
   // Serial Thread
   #ifdef ENABLE_SERIAL_CMDS
-    logQueue = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
+    logQueueCMD = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
     xTaskCreate(
       commandLineInterface,         // task function
       "CommandLineInterface",       // name

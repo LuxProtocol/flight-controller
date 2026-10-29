@@ -342,9 +342,9 @@ void logf(const char *fmt, ...) {
   if (xQueueSend(logQueueCMD, &msg, 0) != pdTRUE) {
     __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
   }
-  if (xQueueSend(logQueueWEB, &msg, 0) != pdTRUE) {
-    __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
-  }
+  //if (xQueueSend(logQueueWEB, &msg, 0) != pdTRUE) {
+  //  __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
+  //}
 }
 
 

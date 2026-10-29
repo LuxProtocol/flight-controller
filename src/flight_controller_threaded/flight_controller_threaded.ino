@@ -4,11 +4,13 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "driver/ledc.h"
+#include "driver/temperature_sensor.h"
 #include <stdarg.h>
 #include <string.h>
 
 // commands
 #include "commands.h"
+#include "webapp.h"
 
 #define BNO08X_RESET -1
 Adafruit_BNO08x bno08x(BNO08X_RESET);
@@ -37,6 +39,7 @@ sh2_SensorValue_t sensorValue;
 #define ENABLE_YAW_CORRECTION       0
 #define DEBUG_PRINT                 0
 #define ENABLE_SERIAL_CMDS          1
+#define ENABLE_WEB                  1
 #define ENABLE_MOTORS               1
 // ---------------- Debugging ----------------
 
@@ -53,8 +56,8 @@ struct MotorOutputs {
 // ---------------- PID gains ----------------
 struct PIDGains { float kp, ki, kd; };
 
-PIDGains rollGains  = {1.7, 0.15, 0.35};
-PIDGains pitchGains = {1.7, 0.15, 0.35};
+PIDGains rollGains  = {1.7, 0.02, 0.35};
+PIDGains pitchGains = {1.7, 0.02, 0.35};
 PIDGains yawGains   = {0.6, 0.0, 0.0};
 #define ROLL_TRIM     0.0
 #define PITCH_TRIM    0.0
@@ -70,8 +73,8 @@ struct PIDState {
   float outputMin;
 };
 
-PIDState rollState  = {0, 150, 250, -250};
-PIDState pitchState = {0, 150, 250, -250};
+PIDState rollState  = {0, 75,  250, -250};
+PIDState pitchState = {0, 75,  250, -250};
 PIDState yawState   = {0, 50,  120, -120};
 
 // ---------------- Orientation state ----------------
@@ -87,7 +90,7 @@ bool debug = true;
 #define PWM_FREQUENCY       250   // Hz
 #define PWM_RESOLUTION      12    // bits  →  0 – 4095
 
-int throttle_pwm = 1500;   // hover-ish baseline, tune for your build
+int throttle_pwm = 1475;   // hover-ish baseline, tune for your build
 #define MIN_PWM           1138
 #define MAX_PWM           2512
 #define OFF_PWM           256
@@ -97,6 +100,7 @@ unsigned long lastMicros = 0;
 // ---------------- Threading ----------------
 TaskHandle_t FlightThread = NULL;
 TaskHandle_t CLIThread = NULL;
+TaskHandle_t WEBThread = NULL;
 //TaskHandle_t taskFloat2Handle = NULL;
 
 
@@ -111,6 +115,10 @@ struct LogMsg { char text[LOG_MSG_LEN]; };
 
 static QueueHandle_t logQueue;
 static uint32_t droppedLogs = 0;
+#define CMD_MAX 128
+
+temperature_sensor_handle_t temp_handle = NULL;
+temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(10, 70);
 
 // ---------------- ^ Variable Settings ^ ----------------
 
@@ -213,9 +221,9 @@ float computePID(float error, float measuredRate, float dt,
                   PIDGains &g, PIDState &s) {
   float P = g.kp * error;
 
-  s.integral += error * dt;
+  s.integral = error * dt + constrain(s.integral, -25, 25); // was +=
   s.integral = constrain(s.integral, -s.integralMax, s.integralMax);
-  float I = g.ki * s.integral;
+  float I = 0;//g.ki * s.integral;
 
   float D = -g.kd * measuredRate;
 
@@ -223,10 +231,11 @@ float computePID(float error, float measuredRate, float dt,
 }
 // ---------------- Core PID (derivative on measured rate) ----------------
 
-// ---------------- Throttle Control ----------------
+// ---------------- External Control ----------------
 static void cmdThrottle(int argc, char **argv) {
   if(strcasecmp(argv[1], "up")==0) throttle_pwm+=5;
   else if(strcasecmp(argv[1], "down")==0) throttle_pwm-=5;
+  else if(strcasecmp(argv[1], "set")==0){char *end; throttle_pwm=constrain(strtol(argv[2], &end, 10),MIN_PWM, MAX_PWM);}
   else {Serial.printf("Invalid input: %s\n", argv[1]); return;}
   Serial.printf("Throttle Changed to %d\n", throttle_pwm);
 }
@@ -241,7 +250,14 @@ static void cmdDebug(int argc, char **argv) {
   else if(strcasecmp(argv[1], "off")==0) debug=false;
   else Serial.printf("Invalid input: %s\n", argv[1]);
 }
-// ---------------- Throttle Control ----------------
+static int getTemp() {
+  temperature_sensor_enable(temp_handle);
+  float tsens_out = 0;
+  temperature_sensor_get_celsius(temp_handle, &tsens_out);
+  temperature_sensor_disable(temp_handle);
+  return round(tsens_out);
+}
+// ---------------- External Control ----------------
 
 // ---------------- Main entry point ----------------
 // desiredX/Y/Z in range roughly [-1, 1] (e.g. from joystick/RC, normalized)
@@ -425,18 +441,29 @@ void setup() {
   Serial.begin(115200);
   setupIMU();
   setupESC();
+  temperature_sensor_install(&temp_sensor_config, &temp_handle);
+
+  #ifdef ENABLE_WEB
+    xTaskCreate(
+      webApplication,               // task function
+      "WebApplication",             // name
+      4096,                         // stack size (bytes) — increase if stack overflow occurs
+      NULL,                         // parameter
+      2,                            // priority (higher = more urgent; was 1)
+      &WEBThread                    // handle
+    );
+  #endif
 
   // Serial Thread
   #ifdef ENABLE_SERIAL_CMDS
     logQueue = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
-    xTaskCreatePinnedToCore(
+    xTaskCreate(
       commandLineInterface,         // task function
       "CommandLineInterface",       // name
       4096,                         // stack size (bytes) — increase if stack overflow occurs
       NULL,                         // parameter
       1,                            // priority (higher = more urgent; was 1)
-      &CLIThread,                   // handle
-      0                             // core
+      &CLIThread                   // handle
     );
   #endif
 

@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <strings.h>
 #include <stdlib.h>
+#include <string.h>
 
 constexpr int MAX_ARGS = 8;
 
@@ -9,13 +10,21 @@ constexpr int MAX_ARGS = 8;
 static void cmdThrottle(int argc, char **argv);
 static void cmdESC(int argc, char **argv);
 static void cmdDebug(int argc, char **argv);
+static int getTemp();
 // ----------------------------- //
 
 static void cmdHelp(int argc, char **argv);
 
-static void cmdStatus(int, char **) {
-  Serial.printf("uptime   : %lu s\n", millis()/1000);
-  Serial.printf("free heap: %u bytes\n", ESP.getFreeHeap());
+static void cmdStatus(int, char ** argv) {
+  String uptime = "uptime: " + String(millis()/1000);
+  String mem = "free heap: " + String(ESP.getFreeHeap());
+  String temp = "temp: " + String(getTemp());
+  Serial.println(uptime + " s");
+  Serial.println(mem + " bytes");
+  Serial.println(temp + " C");
+  argv[0] = strdup(uptime.c_str());
+  argv[1] = strdup(mem.c_str());
+  argv[2] = strdup(temp.c_str());
 }
 
 static void cmdReboot(int, char **) {
@@ -38,13 +47,13 @@ struct Command {
 };
 
 static const Command commands[] = {
-  {"help",      "",               "list commands",                  cmdHelp},
-  {"status",    "",               "show system status",             cmdStatus},
-  {"reboot",    "",               "restart the chip",               cmdReboot},
-  {"echo",      "[text]",         "echo text back",                 cmdEcho},
-  {"throttle",  "[up/down]",      "change throttle",                cmdThrottle},
-  {"esc",       "[arm/disarm]",   "arm/disarm ESCs",                cmdESC},
-  {"debug",     "[on/off]",       "enable/disable debugging",       cmdDebug},
+  {"help",      "",               "list commands",             cmdHelp},
+  {"status",    "",               "show system status",        cmdStatus},
+  {"reboot",    "",               "restart the chip",          cmdReboot},
+  {"echo",      "[text]",         "echo text back",            cmdEcho},
+  {"throttle",  "[up/down/set]",  "change throttle",           cmdThrottle},
+  {"esc",       "[arm/disarm]",   "arm/disarm ESCs",           cmdESC},
+  {"debug",     "[on/off]",       "enable/disable debugging",  cmdDebug},
 };
 
 static void cmdHelp(int, char **) {

@@ -84,7 +84,7 @@ float yawHold = 0;
 bool yawHoldSet = false;
 int counter = 0;
 bool armed = false;
-bool debug = true;
+bool debug = false;
 
 // ---------------- Motor Control ----------------
 #define PWM_FREQUENCY       250   // Hz
@@ -340,15 +340,17 @@ void logf(const char *fmt, ...) {
   va_end(args);
 
   // Timeout of 0 = never block the caller; drop the message if the queue is full
-  if (xQueueSend(logQueueCMD, &msg, 0) != pdTRUE) {
-    __atomic_add_fetch(&droppedLogsCMD, 1, __ATOMIC_RELAXED);
+  if(debug){
+    if (xQueueSend(logQueueCMD, &msg, 0) != pdTRUE) {
+      __atomic_add_fetch(&droppedLogsCMD, 1, __ATOMIC_RELAXED);
+    }
   }
   if (xQueueSend(logQueueWEB, &msg, 0) != pdTRUE) {
     __atomic_add_fetch(&droppedLogsWEB, 1, __ATOMIC_RELAXED);
   }
 }
 
-static int getFlightData(String *queue, int max){
+static int getFlightData(char **queue, int max){
   LogMsg msg;
   int index = 0;
 
@@ -438,15 +440,12 @@ void flightController(void *pvParameters) {
   #endif
 
   #ifdef DEBUG_PRINT
-    if(counter>10){
+    if(counter>5){
       counter=0;
-      if(debug){
-        // Display IMU Readings
-        logf("Orientation: %.4f, %.4f, %.4f", currentYaw, currentPitch, currentRoll);
-        // Display Motor Vectors
-        logf("Motor: %d, %d, %d, %d", m.FL, m.FR, m.RL, m.RR);
-        // 
-      }
+      // Display IMU Readings
+      logf("Orientation: %.4f, %.4f, %.4f", currentYaw, currentPitch, currentRoll);
+      // Display Motor Vectors
+      logf("Motor: %d, %d, %d, %d", m.FL, m.FR, m.RL, m.RR);
     }
     counter++;
   #endif

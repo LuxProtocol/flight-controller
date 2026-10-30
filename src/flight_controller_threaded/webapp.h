@@ -1,7 +1,8 @@
 #pragma once
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WebServer.h>
+#include <AsyncTCP.h>             // by ESP32Async
+#include <ESPAsyncWebServer.h>    // by ESP32Async
 #include <string.h>
 
 #include "commands.h"
@@ -21,12 +22,13 @@ const char *WIFI_SSID = "your_ssid"; // only used when USE_ACCESS_POINT is false
 const char *WIFI_PASS = "your_password";
 // ------------------
 
-WebServer server(80);
+AsyncWebServer server(80);
+AsyncEventSource events("/events");
 bool ledState = false;
 
-void handleRoot() { server.send_P(200, "text/html", PAGE); }
-void handleState() { server.send(200, "text/plain", ledState ? "ON" : "OFF"); }
-static int getFlightData(String * queue, int max);
+void handleRoot(AsyncWebServerRequest *request) { request->send_P(200, "text/html", PAGE); }
+void handleState(AsyncWebServerRequest *request) { request->send(200, "text/plain", ledState ? "ON" : "OFF"); }
+static int getFlightData(char **queue, int max);
 
 /*void handleToggle()
 {
@@ -44,18 +46,18 @@ void pressButton(){
   digitalWrite(togglePin, LOW);
 }
 
-void handleToggle(){
+void handleToggle(AsyncWebServerRequest *request){
   pressButton();
   ledState = !ledState;
-  server.send(200, "text/plain", ledState ? "ON" : "OFF");
+  request->send(200, "text/plain", ledState ? "ON" : "OFF");
 }
 
-void reboot(){
+void reboot(AsyncWebServerRequest *request){
   char *args[] = { "reboot", NULL };
   cmdReboot(1, args);
-  server.send(200, "text/plain", "Rebooting");
+  request->send(200, "text/plain", "Rebooting");
 }
-void systemStatus(){
+void systemStatus(AsyncWebServerRequest *request){
   char *args[] = { "uptime", "memory", "temp", NULL };
   cmdStatus(2, args);
   String body;
@@ -63,17 +65,17 @@ void systemStatus(){
     body += args[i];
     body += "\n";
   }
-  server.send(200, "text/plain", body);
+  request->send(200, "text/plain", body);
 }
-void armESC(){
+void armESC(AsyncWebServerRequest *request){
   char *args[] = { "esc", "arm", NULL };
   cmdESC(2, args);
-  server.send(200, "text/plain", "ARMED");
+  request->send(200, "text/plain", "ARMED");
 }
-void disarmESC(){
+void disarmESC(AsyncWebServerRequest *request){
   char *args[] = { "esc", "disarm", NULL };
   cmdESC(2, args);
-  server.send(200, "text/plain", "DISARMED");
+  request->send(200, "text/plain", "DISARMED");
 }
 
 // new ^^^
@@ -84,7 +86,7 @@ void webApplication(void *pvParameters)
   pinMode(togglePin, OUTPUT);
   digitalWrite(togglePin, LOW);
 
-  String webQueue[8];
+  char *webQueue[4];
   int count;
 
 #if USE_ACCESS_POINT
@@ -116,15 +118,17 @@ void webApplication(void *pvParameters)
   server.on("/esc/arm", armESC);
   server.on("/esc/disarm", disarmESC);
 
+  server.addHandler(&events);
   server.begin();
 
   for(;;){
-    server.handleClient();
+    //server.handleClient();
 
 
-    count = getFlightData(webQueue, 8);
+    count = getFlightData(webQueue, 2);
     for(int i = 0; i < count; i++) {
-      server.send(200, "text/plain", webQueue[i]);
+      events.send(webQueue[i], "flightData", millis());
     }
+    //vTaskDelay(pdMS_TO_TICKS(50));
   }
 }

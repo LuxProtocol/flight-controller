@@ -28,6 +28,13 @@ const char PAGE[] PROGMEM = R"rawliteral(
 :root[data-layout="phone"] .shell{padding:0 20px}:root[data-layout="phone"] .topbar{min-height:80px}:root[data-layout="phone"] .brand{font-size:14px}:root[data-layout="phone"] .connection{max-width:132px;font-size:11px}:root[data-layout="phone"] .intro{padding:32px 0 24px}:root[data-layout="phone"] .device{display:none}:root[data-layout="phone"] .grid{grid-template-columns:1fr;gap:16px}:root[data-layout="phone"] .panel{padding:22px}:root[data-layout="phone"] .telemetry{grid-column:auto}:root[data-layout="phone"] .visual,:root[data-layout="phone"] .esc-visual{min-height:170px}:root[data-layout="phone"] .stats{grid-template-columns:1fr;gap:14px;margin:20px 0}:root[data-layout="phone"] .metric{border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;display:flex;justify-content:space-between;align-items:center}:root[data-layout="phone"] .metric:last-child{padding:0}:root[data-layout="phone"] .stats dd{font-size:22px}:root[data-layout="phone"] .stats dt{margin:0}:root[data-layout="phone"] .system-footer{align-items:start;flex-direction:column;gap:12px}:root[data-layout="phone"] .footer{flex-direction:column;gap:3px}
 :root[data-layout="phone"] .shell{max-width:480px}
 @media(max-width:680px){:root:not([data-layout="laptop"]) .shell{padding:0 20px}:root:not([data-layout="laptop"]) .topbar{min-height:80px}:root:not([data-layout="laptop"]) .brand{font-size:14px}:root:not([data-layout="laptop"]) .connection{max-width:132px;font-size:11px}:root:not([data-layout="laptop"]) .intro{padding:32px 0 24px}:root:not([data-layout="laptop"]) .device{display:none}:root:not([data-layout="laptop"]) .grid{grid-template-columns:1fr;gap:16px}:root:not([data-layout="laptop"]) .panel{padding:22px}:root:not([data-layout="laptop"]) .telemetry{grid-column:auto}:root:not([data-layout="laptop"]) .visual,:root:not([data-layout="laptop"]) .esc-visual{min-height:170px}:root:not([data-layout="laptop"]) .stats{grid-template-columns:1fr;gap:14px;margin:20px 0}:root:not([data-layout="laptop"]) .metric{border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;display:flex;justify-content:space-between;align-items:center}:root:not([data-layout="laptop"]) .metric:last-child{padding:0}:root:not([data-layout="laptop"]) .stats dd{font-size:22px}:root:not([data-layout="laptop"]) .stats dt{margin:0}:root:not([data-layout="laptop"]) .system-footer{align-items:start;flex-direction:column;gap:12px}:root:not([data-layout="laptop"]) .footer{flex-direction:column;gap:3px}}
+.flight{grid-column:1/-1}.flight-body{display:grid;grid-template-columns:1.35fr 1fr;gap:20px;margin:22px 0 14px}.drone-view{position:relative;min-height:300px;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}.drone-view canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.motor-map{display:flex;flex-direction:column;gap:8px}.front-label{text-align:center;font-size:10px;letter-spacing:.18em;color:var(--muted)}
+.motor-grid{position:relative;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:4px;background:linear-gradient(to top right,transparent calc(50% - 1px),var(--edge) 50%,transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),var(--edge) 50%,transparent calc(50% + 1px))}.motor-grid::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px;border-radius:50%;background:var(--panel);border:2px solid var(--edge)}
+.motor{--p:0;position:relative;z-index:1;display:grid;justify-items:center;gap:1px;padding:12px 8px;background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;text-align:center}
+.ring{position:relative;display:grid;place-items:center;width:72px;height:72px;margin-bottom:6px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),var(--track) 0)}.ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--panel)}.ring b{position:relative;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.m-name{font-size:12px;font-weight:650}.m-pos{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}.m-val{font-size:13px;font-variant-numeric:tabular-nums}.mono{font-family:Consolas,Monaco,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:root[data-layout="phone"] .flight-body{grid-template-columns:1fr}@media(max-width:680px){:root:not([data-layout="laptop"]) .flight-body{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -54,6 +61,14 @@ const char PAGE[] PROGMEM = R"rawliteral(
 <div class="panel-head"><div><p class="eyebrow">Flight system</p><h2 id="esc-title">ESC control</h2></div><span class="number">02</span></div>
 <div class="esc-visual"><div><span class="esc-symbol" aria-hidden="true">✣</span><div class="state-label">Controller arm state</div><div id="esc-state" class="state-value" aria-live="polite">Disarmed</div></div><button id="esc" class="switch" role="switch" aria-checked="false" aria-labelledby="esc-title" disabled></button></div>
 <p class="esc-note">Arming enables motor output.</p><p id="esc-msg" class="msg" role="status"></p>
+</section>
+<section class="panel flight" aria-labelledby="flight-title">
+<div class="panel-head"><div><p class="eyebrow">Flight data</p><h2 id="flight-title">Attitude &amp; motor output</h2></div><span id="flight-tag" class="live-tag">Awaiting stream</span></div>
+<div class="flight-body">
+<div class="drone-view"><canvas id="drone" role="img" aria-label="Live 3D view of the drone’s attitude"></canvas></div>
+<div class="motor-map" role="group" aria-label="Motor outputs, top view, front at the top"><div class="front-label">▲ FRONT</div><div id="motor-grid" class="motor-grid"></div></div>
+</div>
+<p id="flight-raw" class="hint mono">Last message: —</p>
 </section>
 <section class="panel telemetry" aria-labelledby="system-title">
 <div class="panel-head"><div><p class="eyebrow">System telemetry</p><h2 id="system-title">Controller health</h2></div><span id="updated" class="live-tag">Awaiting device</span></div>
@@ -222,6 +237,191 @@ $("reboot").addEventListener("click", async () => {
     await sleep(STATUS_INTERVAL_MS);
   }
 })();
+
+// ---- Flight data: live attitude and motor outputs over server-sent events ----
+const FLIGHT_STREAM_URL = "/events";  // AsyncEventSource path on the ESP32
+const FLIGHT_EVENT = "flightData";    // event name passed to events.send()
+const FLIGHT_STALE_MS = 2000;         // no message for this long = stream stalled
+const MOTOR_PWM_MIN = 1000, MOTOR_PWM_MAX = 2000;                // ESC pulse range, µs
+const MOTOR_VECTOR_SCALE = 5, ARROW_MIN = 0.4, ARROW_MAX = 6;    // thrust arrow length, model units
+// Body frame: +Y is up and the front is -Z. Order must match the firmware's motor order.
+const MOTORS = [
+  {name: "M1", pos: "Front Right", color: "#cc3333", at: [ 5, 0, -5], spin:  1},
+  {name: "M2", pos: "Front Left",  color: "#33aa33", at: [-5, 0, -5], spin: -1},
+  {name: "M3", pos: "Rear Left",   color: "#3366cc", at: [-5, 0,  5], spin:  1},
+  {name: "M4", pos: "Rear Right",  color: "#ccaa00", at: [ 5, 0,  5], spin: -1},
+];
+const flight = {
+  q: [0, 0, 0, 1], gotQuat: false, calibrated: false, hasMotors: false, dirty: false, last: 0, raw: "",
+  motors: MOTORS.map(() => ({pwm: null, vec: [0, 0, 0]})),
+};
+
+// Quaternions are [x, y, z, w].
+const qMul = (a, b) => [
+  a[3]*b[0] + a[0]*b[3] + a[1]*b[2] - a[2]*b[1],
+  a[3]*b[1] - a[0]*b[2] + a[1]*b[3] + a[2]*b[0],
+  a[3]*b[2] + a[0]*b[1] - a[1]*b[0] + a[2]*b[3],
+  a[3]*b[3] - a[0]*b[0] - a[1]*b[1] - a[2]*b[2]];
+const qAxis = (axis, deg) => {
+  const h = deg * Math.PI / 360, s = Math.sin(h);
+  return [axis === "x" ? s : 0, axis === "y" ? s : 0, axis === "z" ? s : 0, Math.cos(h)];
+};
+function qRot(q, v) {
+  const [x, y, z, w] = q, tx = 2*(y*v[2] - z*v[1]), ty = 2*(z*v[0] - x*v[2]), tz = 2*(x*v[1] - y*v[0]);
+  return [v[0] + w*tx + y*tz - z*ty, v[1] + w*ty + z*tx - x*tz, v[2] + w*tz + x*ty - y*tx];
+}
+// Euler angles (degrees, YZX order) to a quaternion, matching the serial viewer.
+function eulerToQuat(o, calibrated) {
+  const [x, y, z] = calibrated ? [360 - o[2], o[0], o[1]] : [o[2], o[0] - 180, -o[1]];
+  return qMul(qMul(qAxis("y", y), qAxis("z", z)), qAxis("x", x));
+}
+
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const thrustOf = pwm => clamp01((pwm - MOTOR_PWM_MIN) / (MOTOR_PWM_MAX - MOTOR_PWM_MIN));
+const motorLevel = m => m.pwm != null ? thrustOf(m.pwm) : clamp01(Math.hypot(...m.vec));
+
+// Accepts the same lines the serial viewer reads:
+//   "Quaternion: w,x,y,z"   "Orientation: heading,roll,pitch"   "Calibration: ..."
+//   "Motors: p1,p2,p3,p4" (PWM µs)  or  "Motors: x1,y1,z1, ... x4,y4,z4" (vectors)
+function handleFlightLine(line) {
+  const m = /^(orientation|quaternion|calibration|motors?)\s*:\s*(.*)$/i.exec(line);
+  if (!m) return;
+  const key = m[1].toLowerCase(), v = m[2].split(",").map(Number);
+  if (v.some(Number.isNaN)) return;
+  if (key === "quaternion" && v.length >= 4) { flight.q = [v[1], v[3], -v[2], v[0]]; flight.gotQuat = true; }
+  else if (key === "orientation" && v.length >= 3) { if (!flight.gotQuat) flight.q = eulerToQuat(v, flight.calibrated); }
+  else if (key === "calibration") flight.calibrated = true;
+  else if (key.startsWith("motor")) {
+    if (v.length >= 12) MOTORS.forEach((_, i) => { flight.motors[i] = {pwm: null, vec: v.slice(i*3, i*3 + 3)}; });
+    else if (v.length >= 4) MOTORS.forEach((_, i) => { flight.motors[i] = {pwm: v[i], vec: [0, thrustOf(v[i]), 0]}; });
+    else return;
+    flight.hasMotors = true;
+  }
+}
+const flightSource = new EventSource(FLIGHT_STREAM_URL);
+flightSource.addEventListener(FLIGHT_EVENT, e => {
+  flight.last = performance.now();
+  for (const line of String(e.data).split("\n")) { flight.raw = line.trim(); handleFlightLine(flight.raw); }
+  flight.dirty = true;
+});
+
+// Motor map: front motors on the top row, rear on the bottom.
+const motorCards = [1, 0, 2, 3].map(i => {
+  const m = MOTORS[i], el = document.createElement("div");
+  el.className = "motor"; el.style.setProperty("--c", m.color);
+  el.innerHTML = `<div class="ring"><b>--</b></div><div class="m-name">${m.name}</div><div class="m-pos">${m.pos}</div><div class="m-val">— µs</div>`;
+  $("motor-grid").appendChild(el);
+  return {i, el, pct: el.querySelector("b"), val: el.querySelector(".m-val")};
+});
+function updateMotorMap() {
+  if (!flight.hasMotors) return;
+  for (const c of motorCards) {
+    const m = flight.motors[c.i], lvl = motorLevel(m);
+    c.el.style.setProperty("--p", (lvl * 100).toFixed(1));
+    c.pct.textContent = Math.round(lvl * 100) + "%";
+    c.val.textContent = m.pwm != null ? Math.round(m.pwm) + " µs" : "|F| " + Math.hypot(...m.vec).toFixed(2);
+  }
+}
+
+// Drone view: a small 3D projection drawn on a 2D canvas, so no external libraries are needed
+// (the ESP32's own Wi-Fi network usually has no internet access to load one from).
+const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const phase = MOTORS.map(() => 0);
+const camera = qMul(qAxis("x", 24), qAxis("y", -35));   // fixed viewing angle: from above and behind
+let palette = null, paletteAt = -1e9;
+function readPalette(now) {
+  if (palette && now - paletteAt < 500) return palette;   // re-read so theme changes show up
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  paletteAt = now;
+  return palette = {ink: g("--ink"), muted: g("--muted"), line: g("--line"), edge: g("--edge"), accent: g("--accent")};
+}
+function drawDrone(now, dt) {
+  const cv = $("drone"), W = cv.clientWidth, H = cv.clientHeight;
+  if (!W || !H) return;
+  const dpr = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  }
+  const ctx = cv.getContext("2d"), P = readPalette(now), f = Math.min(W, H) * 1.5;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+
+  // Returns [screenX, screenY, depth, pixelsPerUnit]. The camera sits at z = 30.
+  const toScreen = p => { const v = qRot(camera, p), s = f / (30 - v[2]); return [W/2 + v[0]*s, H/2 - v[1]*s, v[2], s]; };
+  const body = p => toScreen(qRot(flight.q, p));   // also applies the drone's attitude
+  const path = pts => { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); };
+  const seg = (a, b) => path([a, b]);
+  const ring = (c, r) => Array.from({length: 20}, (_, k) => [c[0] + r*Math.cos(k*Math.PI/10), c[1], c[2] + r*Math.sin(k*Math.PI/10)]);
+
+  // Floor grid and shadow stay fixed in the world, so the drone's tilt reads against them.
+  ctx.strokeStyle = P.line; ctx.lineWidth = 1;
+  for (let i = -12; i <= 12; i += 4) {
+    seg(toScreen([i, -7, -12]), toScreen([i, -7, 12])); ctx.stroke();
+    seg(toScreen([-12, -7, i]), toScreen([12, -7, i])); ctx.stroke();
+  }
+  path(ring([0, -7, 0], 6).map(toScreen)); ctx.closePath();
+  ctx.globalAlpha = .25; ctx.fillStyle = "#000"; ctx.fill(); ctx.globalAlpha = 1;
+
+  // Collect the parts, then paint them far to near.
+  const hub = body([0, 0, 0]), items = [];
+  MOTORS.forEach((m, i) => {
+    const top = [m.at[0], .35, m.at[2]], mp = body(m.at), mo = flight.motors[i], lvl = motorLevel(mo);
+    if (!calm) phase[i] += m.spin * lvl * 14 * dt;   // propellers spin faster with more thrust
+    items.push({z: Math.min(hub[2], mp[2]) - .001, draw() {
+      ctx.strokeStyle = P.muted; ctx.lineWidth = .4 * hub[3]; seg(hub, mp); ctx.stroke();
+    }});
+    items.push({z: mp[2], draw() {
+      ctx.fillStyle = m.color;
+      ctx.beginPath(); ctx.arc(mp[0], mp[1], .55 * mp[3], 0, 7); ctx.fill();
+      path(ring(top, 1.6).map(body)); ctx.closePath();
+      ctx.globalAlpha = .12 + .25 * lvl; ctx.fill();
+      ctx.globalAlpha = .8; ctx.strokeStyle = m.color; ctx.lineWidth = 1.5; ctx.stroke(); ctx.globalAlpha = 1;
+      const tb = body(top), dx = 1.6 * Math.cos(phase[i]), dz = 1.6 * Math.sin(phase[i]);
+      ctx.lineWidth = .2 * tb[3];
+      seg(body([top[0] + dx, top[1], top[2] + dz]), body([top[0] - dx, top[1], top[2] - dz])); ctx.stroke();
+      const mag = Math.hypot(...mo.vec);   // thrust arrow, same scaling as the serial viewer
+      if (mag > 1e-6) {
+        const len = Math.min(ARROW_MAX, Math.max(ARROW_MIN, mag * MOTOR_VECTOR_SCALE));
+        const tip = body(top.map((c, k) => c + mo.vec[k] / mag * len));
+        const ax = tip[0] - tb[0], ay = tip[1] - tb[1], d = Math.hypot(ax, ay) || 1;
+        const ux = ax / d, uy = ay / d, px = -uy, py = ux, hs = .7 * tip[3];
+        ctx.strokeStyle = ctx.fillStyle = m.color; ctx.lineWidth = Math.max(2, .22 * tb[3]);
+        seg(tb, tip); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(tip[0] + ux*hs, tip[1] + uy*hs);
+        ctx.lineTo(tip[0] - ux*hs*.6 + px*hs*.6, tip[1] - uy*hs*.6 + py*hs*.6);
+        ctx.lineTo(tip[0] - ux*hs*.6 - px*hs*.6, tip[1] - uy*hs*.6 - py*hs*.6);
+        ctx.closePath(); ctx.fill();
+      }
+    }});
+  });
+  items.push({z: hub[2], draw() {
+    path(ring([0, .4, 0], 1.4).map(body)); ctx.closePath();
+    ctx.fillStyle = P.ink; ctx.globalAlpha = .9; ctx.fill(); ctx.globalAlpha = 1;
+    ctx.strokeStyle = P.edge; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.strokeStyle = P.accent; ctx.lineWidth = .35 * hub[3];
+    seg(body([0, .4, -.6]), body([0, .4, -2.4])); ctx.stroke();   // nose marker points to the front
+  }});
+  items.sort((a, b) => a.z - b.z).forEach(it => it.draw());
+
+  if (!flight.last || now - flight.last > FLIGHT_STALE_MS) {
+    ctx.fillStyle = P.muted; ctx.font = "12px system-ui, sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("Waiting for flight data…", 14, H - 14);
+  }
+}
+let lastFrame = performance.now(), lastUi = 0, flightTag = "";
+(function frame(now) {
+  const dt = Math.min(.05, (now - lastFrame) / 1000); lastFrame = now;
+  drawDrone(now, dt);
+  if (now - lastUi > 66) {   // text updates at about 15 Hz, the drawing runs every frame
+    lastUi = now;
+    if (flight.dirty) { flight.dirty = false; updateMotorMap(); $("flight-raw").textContent = "Last message: " + (flight.raw || "—"); }
+    const tag = !flight.last ? "Awaiting stream" : now - flight.last > FLIGHT_STALE_MS ? "Stream stalled" : "Streaming";
+    if (tag !== flightTag) $("flight-tag").textContent = flightTag = tag;
+  }
+  requestAnimationFrame(frame);
+})(performance.now());
 </script>
 </body>
 </html>

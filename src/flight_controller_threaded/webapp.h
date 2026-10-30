@@ -137,7 +137,7 @@ void webApplication(void *pvParameters)
       events.send(webQueue[i], "flightData", millis());
     }
 
-    if (millis() - lastRun >= 5000) {
+    if (millis() - lastRun >= 2500) {
       lastRun = millis();
       systemStatus();
     }

@@ -24,7 +24,7 @@ const char PAGE[] PROGMEM = R"rawliteral(
 .primary,.secondary{width:100%;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:650;border:1px solid transparent}.primary{background:var(--accent);color:var(--primary-ink)}.secondary{background:var(--surface);color:var(--ink);border-color:var(--edge)}.msg{font-size:12px;color:var(--err);min-height:20px;margin:9px 0 0}.msg.ok{color:var(--accent)}
 .secondary[aria-busy="true"]::before{content:"";display:inline-block;width:.9em;height:.9em;margin-right:.6em;vertical-align:-.1em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .esc-visual{min-height:195px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 8px}.esc-symbol{color:var(--muted);display:block;font-size:26px;margin-bottom:10px;line-height:1}.switch{position:relative;flex:none;width:64px;height:36px;padding:0;border:1px solid var(--edge);border-radius:30px;background:var(--track);transition:background .25s,border-color .25s,box-shadow .25s}.switch::after{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:var(--knob);box-shadow:0 1px 4px #0006;transition:transform .35s cubic-bezier(.3,1.5,.5,1),width .15s,background .25s}.switch:active::after{width:32px}.switch[aria-checked="true"]{background:#4d2728;border-color:#bd6e63;box-shadow:0 0 22px -6px #ff7a6e}.switch[aria-checked="true"]::after{transform:translateX(28px);background:#ffb1a4}.switch[aria-checked="true"]:active::after{transform:translateX(22px)}.esc-note{font-size:12px;margin:0;padding:11px 14px;border:1px solid var(--edge);border-radius:8px;color:var(--muted);background:var(--surface)}
-.telemetry{grid-column:1/-1;padding-bottom:22px}.stats{display:grid;grid-template-columns:repeat(3,1fr);margin:25px 0 23px;gap:24px}.metric{border-right:1px solid var(--line);padding:0 20px 0 0}.metric:last-child{border:0}.stats dt{font-size:12px;color:var(--muted);margin-bottom:5px}.stats dd{margin:0;font-size:27px;letter-spacing:-.025em;font-variant-numeric:tabular-nums;line-height:1.5}.stats.stale dd{color:var(--muted)}.system-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding-top:18px}.system-footer .secondary{width:auto;white-space:nowrap;font-size:12px;padding:9px 16px}.system-footer .msg{margin:0}.live-tag{color:var(--muted);font-size:11px}.footer{display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:11px;padding:24px 0 32px}.footer span:last-child{color:var(--muted)}
+.telemetry{grid-column:1/-1;padding-bottom:22px}.stats{display:grid;grid-template-columns:repeat(4,1fr);margin:25px 0 23px;gap:24px}.metric{border-right:1px solid var(--line);padding:0 20px 0 0}.metric:last-child{border:0}.stats dt{font-size:12px;color:var(--muted);margin-bottom:5px}.stats dd{margin:0;font-size:27px;letter-spacing:-.025em;font-variant-numeric:tabular-nums;line-height:1.5}.stats.stale dd{color:var(--muted)}.system-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding-top:18px}.system-footer .secondary{width:auto;white-space:nowrap;font-size:12px;padding:9px 16px}.system-footer .msg{margin:0}.live-tag{color:var(--muted);font-size:11px}.footer{display:flex;justify-content:space-between;gap:16px;color:var(--muted);font-size:11px;padding:24px 0 32px}.footer span:last-child{color:var(--muted)}
 :root[data-layout="phone"] .shell{padding:0 20px}:root[data-layout="phone"] .topbar{min-height:80px}:root[data-layout="phone"] .brand{font-size:14px}:root[data-layout="phone"] .connection{max-width:132px;font-size:11px}:root[data-layout="phone"] .intro{padding:32px 0 24px}:root[data-layout="phone"] .device{display:none}:root[data-layout="phone"] .grid{grid-template-columns:1fr;gap:16px}:root[data-layout="phone"] .panel{padding:22px}:root[data-layout="phone"] .telemetry{grid-column:auto}:root[data-layout="phone"] .visual,:root[data-layout="phone"] .esc-visual{min-height:170px}:root[data-layout="phone"] .stats{grid-template-columns:1fr;gap:14px;margin:20px 0}:root[data-layout="phone"] .metric{border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;display:flex;justify-content:space-between;align-items:center}:root[data-layout="phone"] .metric:last-child{padding:0}:root[data-layout="phone"] .stats dd{font-size:22px}:root[data-layout="phone"] .stats dt{margin:0}:root[data-layout="phone"] .system-footer{align-items:start;flex-direction:column;gap:12px}:root[data-layout="phone"] .footer{flex-direction:column;gap:3px}
 :root[data-layout="phone"] .shell{max-width:480px}
 @media(max-width:680px){:root:not([data-layout="laptop"]) .shell{padding:0 20px}:root:not([data-layout="laptop"]) .topbar{min-height:80px}:root:not([data-layout="laptop"]) .brand{font-size:14px}:root:not([data-layout="laptop"]) .connection{max-width:132px;font-size:11px}:root:not([data-layout="laptop"]) .intro{padding:32px 0 24px}:root:not([data-layout="laptop"]) .device{display:none}:root:not([data-layout="laptop"]) .grid{grid-template-columns:1fr;gap:16px}:root:not([data-layout="laptop"]) .panel{padding:22px}:root:not([data-layout="laptop"]) .telemetry{grid-column:auto}:root:not([data-layout="laptop"]) .visual,:root:not([data-layout="laptop"]) .esc-visual{min-height:170px}:root:not([data-layout="laptop"]) .stats{grid-template-columns:1fr;gap:14px;margin:20px 0}:root:not([data-layout="laptop"]) .metric{border-right:0;border-bottom:1px solid var(--line);padding:0 0 14px;display:flex;justify-content:space-between;align-items:center}:root:not([data-layout="laptop"]) .metric:last-child{padding:0}:root:not([data-layout="laptop"]) .stats dd{font-size:22px}:root:not([data-layout="laptop"]) .stats dt{margin:0}:root:not([data-layout="laptop"]) .system-footer{align-items:start;flex-direction:column;gap:12px}:root:not([data-layout="laptop"]) .footer{flex-direction:column;gap:3px}}
@@ -35,6 +35,14 @@ const char PAGE[] PROGMEM = R"rawliteral(
 .ring{position:relative;display:grid;place-items:center;width:72px;height:72px;margin-bottom:6px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),var(--track) 0)}.ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--panel)}.ring b{position:relative;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
 .m-name{font-size:12px;font-weight:650}.m-pos{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}.m-val{font-size:13px;font-variant-numeric:tabular-nums}.mono{font-family:Consolas,Monaco,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 :root[data-layout="phone"] .flight-body{grid-template-columns:1fr}@media(max-width:680px){:root:not([data-layout="laptop"]) .flight-body{grid-template-columns:1fr}}
+.monitor{transition:opacity .2s}.monitor.stale{opacity:.5}
+.mon-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:0 0 20px;padding-top:20px;border-top:1px solid var(--line)}.mon-block h3{margin:0 0 12px;font-size:11px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.meter{display:grid;grid-template-columns:100px 1fr 52px;align-items:center;gap:12px;margin:0 0 10px;font-size:13px;white-space:nowrap}.meter b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.bar{height:8px;border-radius:99px;background:var(--track);overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .4s ease}.bar.hot i{background:var(--err)}
+.heap{margin-bottom:16px}.heap-head{display:flex;justify-content:space-between;font-size:13px}.kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 18px;margin:8px 0 0;font-size:12px}.kv div{display:flex;justify-content:space-between;gap:8px}.kv dt{color:var(--muted)}.kv dd{margin:0;font-variant-numeric:tabular-nums}
+.tasks{border-top:1px solid var(--line);padding:14px 0 18px}.tasks summary{cursor:pointer;font-size:11px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}.tasks summary .hint{display:inline;text-transform:none;letter-spacing:0;font-weight:400;margin-left:8px}
+.table-wrap{max-height:280px;overflow:auto;margin-top:12px;border:1px solid var(--line);border-radius:10px}.tasks table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}.tasks th,.tasks td{padding:7px 12px;text-align:right;white-space:nowrap}.tasks th:first-child,.tasks td:first-child{text-align:left}.tasks thead th{position:sticky;top:0;background:var(--surface);color:var(--muted);font-weight:600;font-size:11px}.tasks tbody tr+tr td{border-top:1px solid var(--line)}.tasks tr.low td:nth-child(5){color:var(--err);font-weight:600}
+:root[data-layout="phone"] .mon-grid{grid-template-columns:1fr}@media(max-width:680px){:root:not([data-layout="laptop"]) .mon-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -72,12 +80,20 @@ const char PAGE[] PROGMEM = R"rawliteral(
 </section>
 <section class="panel telemetry" aria-labelledby="system-title">
 <div class="panel-head"><div><p class="eyebrow">System telemetry</p><h2 id="system-title">Controller health</h2></div><span id="updated" class="live-tag">Awaiting device</span></div>
-<dl id="stats" class="stats stale"><div class="metric"><dt>Uptime</dt><dd id="uptime">—</dd></div><div class="metric"><dt>Available memory</dt><dd id="heap">—</dd></div><div class="metric"><dt>Chip temperature</dt><dd id="temp">—</dd></div></dl>
+<dl id="stats" class="stats stale"><div class="metric"><dt>Uptime</dt><dd id="uptime">—</dd></div><div class="metric"><dt>CPU load</dt><dd id="cpu">—</dd></div><div class="metric"><dt>Available memory</dt><dd id="heap">—</dd></div><div class="metric"><dt>Chip temperature</dt><dd id="temp">—</dd></div></dl>
+<div id="monitor" class="monitor stale">
+<div class="mon-grid">
+<div class="mon-block"><h3>CPU load</h3><div id="cores"><p class="hint">Awaiting data…</p></div></div>
+<div class="mon-block"><h3>Memory</h3><div id="heaps"><p class="hint">Awaiting data…</p></div></div>
+</div>
+<details class="tasks" open><summary>Tasks <span id="task-count" class="hint"></span></summary>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>State</th><th>Prio</th><th>Core</th><th>Stack free</th><th>CPU</th></tr></thead><tbody id="tasks"></tbody></table></div></details>
+</div>
 <div class="system-footer"><div><p class="hint">Restart controller</p><p class="hint">Briefly disconnects this console.</p><p id="reboot-msg" class="msg" role="status"></p></div><button id="reboot" class="secondary" disabled>Reboot ESP32</button></div>
 </section>
 </div>
 </main>
-<footer class="footer"><span>Aerial Matrix / Device console</span><span id="rate">Local control · Updates every second</span></footer>
+<footer class="footer"><span>Aerial Matrix / Device console</span><span>Local control · Live telemetry over server-sent events</span></footer>
 </div>
 <script>
 const $ = id => document.getElementById(id);
@@ -122,12 +138,11 @@ applyTheme(storedPreference("theme"));
 applyLayout();
 compactScreen.addEventListener("change", () => { if (layoutChoice === "auto") applyLayout(); });
 
-// How often telemetry and the light state refresh, in milliseconds.
+// How often the connection and light state are checked, in milliseconds.
 const STATUS_INTERVAL_MS = 1000;
-$("rate").textContent = "Local control · Updates every " + STATUS_INTERVAL_MS / 1000 + " s";
 
-let escBusy = false, lightBusy = false, rebooting = false, connected = false, hasArmReadback = false;
-// Starts disarmed. If /systemstatus ever includes "armed: 0/1", the switch follows it.
+let escBusy = false, lightBusy = false, rebooting = false, connected = false;
+// Starts disarmed; the firmware has no arm-state readback.
 let armState = false;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function request(path, timeout = 2500) {
@@ -184,25 +199,18 @@ $("esc").addEventListener("click", async () => {
 });
 function fmtUptime(s) {
   const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-  return [d && d + "d", (d || h) && h + "h", (d || h || m) && m + "m", s % 60 + "s"].filter(Boolean).join(" ");
+  return [d && d + "d", (d || h) && h + "h", (d || h || m) && m + "m", !d && s % 60 + "s"].filter(Boolean).join(" ");
 }
-async function pollStatus() {
+// Reads the light state; this doubles as the connection check.
+async function pollState() {
   try {
-    const text = await request("/systemstatus");
-    const up = /uptime:\s*(\d+)/.exec(text), heap = /free heap:\s*(\d+)/.exec(text), temp = /temp:\s*(-?\d+)/.exec(text), arm = /armed:\s*([01])/.exec(text);
-    if (!up || !heap) throw new Error("Unexpected status response");
-    $("uptime").textContent = fmtUptime(Number(up[1]));
-    $("heap").textContent = (Number(heap[1]) / 1024).toFixed(1) + " KiB";
-    $("temp").textContent = temp ? temp[1] + " °C" : "—";
-    $("stats").classList.remove("stale"); $("updated").textContent = "Updated just now";
-    if (arm) { hasArmReadback = true; if (!escBusy) setEsc(arm[1] === "1"); }
+    showLight(await request("/state"));
     connection(true);
     return true;
   } catch (_) {
-    $("uptime").textContent = $("heap").textContent = $("temp").textContent = "—";
-    $("stats").classList.add("stale"); $("updated").textContent = "Telemetry unavailable";
     $("state").textContent = "Unknown"; $("lamp").classList.remove("on");
-    connection(false); return false;
+    connection(false);
+    return false;
   }
 }
 $("reboot").addEventListener("click", async () => {
@@ -217,10 +225,10 @@ $("reboot").addEventListener("click", async () => {
   // Wait for it to drop off the network first (up to 5 s) so a slow shutdown isn't mistaken for a finished reboot.
   while (Date.now() - start < 5000 && await alive()) await sleep(300);
   while (Date.now() - start < 60000) {
-    if (await pollStatus()) { back = true; break; }
+    if (await pollState()) { back = true; break; }
     await sleep(1000);
   }
-  if (back && !hasArmReadback) { setEsc(false); $("esc-msg").textContent = ""; } // ESC boots disarmed
+  if (back) { setEsc(false); $("esc-msg").textContent = ""; } // the ESC boots disarmed
   $("reboot-msg").textContent = back ? "Controller reconnected." : "Reconnect to the controller Wi-Fi and check power.";
   $("reboot-msg").classList.toggle("ok", back);
   rebooting = false; $("reboot").removeAttribute("aria-busy"); $("reboot").textContent = "Reboot ESP32"; controls();
@@ -228,11 +236,8 @@ $("reboot").addEventListener("click", async () => {
 (async function statusLoop() {
   for (;;) {
     if (!document.hidden && !rebooting) {
-      await pollStatus();
-      if (connected && !lightBusy && !rebooting) {
-        try { showLight(await request("/state")); }
-        catch (_) { $("state").textContent = "Unknown"; $("lamp").classList.remove("on"); }
-      }
+      if (!lightBusy) await pollState();
+      tickMonitor();
     }
     await sleep(STATUS_INTERVAL_MS);
   }
@@ -252,7 +257,7 @@ const MOTORS = [
   {name: "M4", pos: "Rear Right",  color: "#ccaa00", at: [ 5, 0,  5], spin: -1},
 ];
 const flight = {
-  q: [0, 0, 0, 1], gotQuat: false, calibrated: false, hasMotors: false, dirty: false, last: 0, raw: "",
+  q: [0, 0, 0, 1], gotQuat: false, calibrated: false, hasMotors: false, dirty: false, last: 0, raw: "", id: NaN, minOff: Infinity, lag: null, rate: 0,
   motors: MOTORS.map(() => ({pwm: null, vec: [0, 0, 0]})),
 };
 
@@ -298,9 +303,19 @@ function handleFlightLine(line) {
     flight.hasMotors = true;
   }
 }
-const flightSource = new EventSource(FLIGHT_STREAM_URL);
-flightSource.addEventListener(FLIGHT_EVENT, e => {
+let rateCount = 0;   // messages received since the last rate reading
+const stream = new EventSource(FLIGHT_STREAM_URL);   // one connection carries flightData, temperature and monitoringData
+stream.addEventListener(FLIGHT_EVENT, e => {
   flight.last = performance.now();
+  rateCount++;
+  // Lag: how much later than its best case a message arrives, using the ESP32's millis() sent as the event id.
+  const id = e.lastEventId === "" ? NaN : Number(e.lastEventId);
+  if (id < flight.id) flight.minOff = Infinity;   // the device restarted
+  if (Number.isFinite(id)) {
+    flight.id = id;
+    flight.minOff = Math.min(flight.minOff, flight.last - id);
+    flight.lag = flight.last - id - flight.minOff;
+  }
   for (const line of String(e.data).split("\n")) { flight.raw = line.trim(); handleFlightLine(flight.raw); }
   flight.dirty = true;
 });
@@ -410,18 +425,92 @@ function drawDrone(now, dt) {
     ctx.fillText("Waiting for flight data…", 14, H - 14);
   }
 }
-let lastFrame = performance.now(), lastUi = 0, flightTag = "";
+let lastFrame = performance.now(), lastUi = 0, flightTag = "", rateAt = performance.now();
 (function frame(now) {
   const dt = Math.min(.05, (now - lastFrame) / 1000); lastFrame = now;
   drawDrone(now, dt);
   if (now - lastUi > 66) {   // text updates at about 15 Hz, the drawing runs every frame
     lastUi = now;
     if (flight.dirty) { flight.dirty = false; updateMotorMap(); $("flight-raw").textContent = "Last message: " + (flight.raw || "—"); }
-    const tag = !flight.last ? "Awaiting stream" : now - flight.last > FLIGHT_STALE_MS ? "Stream stalled" : "Streaming";
+    if (now - rateAt >= 1000) { flight.rate = rateCount * 1000 / (now - rateAt); rateCount = 0; rateAt = now; }
+    const live = flight.last && now - flight.last <= FLIGHT_STALE_MS;
+    const tag = !flight.last ? "Awaiting stream" : !live ? "Stream stalled"
+      : `Streaming · ${Math.round(flight.rate)} msg/s` + (flight.lag != null ? ` · lag ${Math.round(flight.lag)} ms` : "");
     if (tag !== flightTag) $("flight-tag").textContent = flightTag = tag;
   }
   requestAnimationFrame(frame);
 })(performance.now());
+
+// ---- System monitor: temperature and CPU / memory / task snapshots, pushed over the same stream ----
+const TEMP_EVENT = "temperature", MONITOR_EVENT = "monitoringData";
+const TELEMETRY_STALE_MS = 15000;   // no update for this long (or 3x the monitor interval) = stalled
+const STACK_WARN_BYTES = 512;       // tasks with less free stack than this are highlighted
+const mon = {s: null, cores: [], heaps: {}, tasks: [], at: 0, temp: null, tempAt: 0};
+let pending = null, commitTimer = 0;
+
+const esc = v => String(v).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;"}[c]));
+const pct = x10 => (x10 / 10).toFixed(1) + "%";                  // the *_x10 values are tenths of a percent
+const kib = b => (b / 1024).toFixed(1) + " KiB";
+const meter = (label, p, text) => `<div class="meter"><span>${esc(label)}</span><div class="bar${p >= 90 ? " hot" : ""}"><i style="width:${Math.min(100, Math.max(0, p)).toFixed(1)}%"></i></div><b>${text}</b></div>`;
+
+// One snapshot arrives as separate lines: S (summary), C (per core), H (heap), T (per task).
+// Lines are collected until the burst ends, then shown together.
+function handleMonitorLine(line) {
+  const f = line.split(",").map(x => x.trim()), kind = f[0], n = i => Number(f[i]);
+  if (kind === "S") pending = {s: {uptimeMs: n(1), intervalUs: n(2), cores: n(3), load: n(4), tasks: n(5), overflow: n(6)}, cores: [], heaps: {}, tasks: []};
+  else if (!pending) pending = {s: mon.s, cores: [], heaps: {}, tasks: []};   // lines that arrive without their S line
+  if (kind === "C") pending.cores.push({core: n(1), load: n(2)});
+  else if (kind === "H") pending.heaps[f[1]] = {total: n(2), free: n(3), minFree: n(4), largest: n(5)};
+  else if (kind === "T") pending.tasks.push({name: f[1], state: f[2], prio: n(3), core: n(4), stack: n(5), cpu: n(6)});
+  else if (kind !== "S") return;
+  clearTimeout(commitTimer); commitTimer = setTimeout(commitMonitor, 150);
+}
+function commitMonitor() {
+  if (!pending) return;
+  Object.assign(mon, pending, {at: performance.now()});
+  pending = null;
+  renderMonitor(); tickMonitor();
+}
+function heapBlock(name, h) {
+  if (!h) return "";
+  const label = name === "psram" ? "PSRAM" : "Internal RAM";
+  if (!h.total) return `<div class="heap"><div class="heap-head"><span>${label}</span><b>Not present</b></div></div>`;
+  const used = (h.total - h.free) / h.total * 100;
+  return `<div class="heap">${meter(label, used, used.toFixed(0) + "%")}<dl class="kv"><div><dt>Free</dt><dd>${kib(h.free)}</dd></div><div><dt>Total</dt><dd>${kib(h.total)}</dd></div><div><dt>Lowest free</dt><dd>${kib(h.minFree)}</dd></div><div><dt>Largest block</dt><dd>${kib(h.largest)}</dd></div></dl></div>`;
+}
+function renderMonitor() {
+  $("cores").innerHTML = mon.cores.length
+    ? mon.cores.map(c => meter("Core " + c.core, c.load / 10, pct(c.load))).join("")
+    : '<p class="hint">No per-core data</p>';
+  $("heaps").innerHTML = ["internal", "psram"].map(k => heapBlock(k, mon.heaps[k])).join("") || '<p class="hint">No memory data</p>';
+  const rows = [...mon.tasks].sort((a, b) => b.cpu - a.cpu || a.name.localeCompare(b.name));
+  $("tasks").innerHTML = rows.map(t => `<tr${t.stack < STACK_WARN_BYTES ? ' class="low"' : ""}><td>${esc(t.name)}</td><td>${esc(t.state)}</td><td>${t.prio}</td><td>${t.core < 0 ? "any" : t.core}</td><td>${t.stack.toLocaleString()} B</td><td>${pct(t.cpu)}</td></tr>`).join("");
+  const over = mon.s && mon.s.overflow > 0 ? ` · overflow ${mon.s.overflow}` : "";
+  $("task-count").textContent = `${rows.length} listed${over}`;
+}
+// Runs once a second: ticks the uptime between snapshots and marks old data as stale.
+function tickMonitor() {
+  const now = performance.now(), staleMs = Math.max(TELEMETRY_STALE_MS, mon.s ? mon.s.intervalUs / 1000 * 3 : 0);
+  const fresh = connected && mon.s && mon.at && now - mon.at < staleMs;
+  const tempFresh = connected && mon.tempAt && now - mon.tempAt < staleMs;
+  const h = mon.heaps.internal;
+  $("uptime").textContent = fresh ? fmtUptime(Math.floor((mon.s.uptimeMs + now - mon.at) / 1000)) : "—";
+  $("cpu").textContent = fresh ? pct(mon.s.load) : "—";
+  $("heap").textContent = fresh && h ? kib(h.free) : "—";
+  $("temp").textContent = tempFresh ? mon.temp + " °C" : "—";
+  $("stats").classList.toggle("stale", !fresh);
+  $("monitor").classList.toggle("stale", !fresh);
+  const age = Math.round((now - mon.at) / 1000);
+  $("updated").textContent = !connected ? "Device unavailable" : !mon.at ? "Awaiting device"
+    : fresh ? (age < 2 ? "Updated just now" : "Updated " + age + " s ago") : "Telemetry stalled";
+}
+stream.addEventListener(TEMP_EVENT, e => {
+  const m = /temp:\s*(-?\d+)/i.exec(e.data);
+  if (m) { mon.temp = Number(m[1]); mon.tempAt = performance.now(); tickMonitor(); }
+});
+stream.addEventListener(MONITOR_EVENT, e => {
+  for (const line of String(e.data).split("\n")) if (line.trim()) handleMonitorLine(line.trim());
+});
 </script>
 </body>
 </html>

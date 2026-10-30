@@ -5,8 +5,9 @@
 #include <ESPAsyncWebServer.h>    // by ESP32Async
 #include <string.h>
 
-#include "commands.h"
+//#include "commands.h"
 #include "index_html.h"
+#include "mon_struts.h"
 
 #define togglePin 4
 #define high 1
@@ -21,6 +22,13 @@ const char *AP_PASS = "12345678"; // at least 8 characters
 const char *WIFI_SSID = "your_ssid"; // only used when USE_ACCESS_POINT is false
 const char *WIFI_PASS = "your_password";
 // ------------------
+
+// ---- Monitoring ---- //
+
+static char  buf[SYSMON_LINES_BUF_BYTES];
+static char *lines[SYSMON_MAX_LINES];
+
+// -------------------- //
 
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
@@ -57,15 +65,13 @@ void reboot(AsyncWebServerRequest *request){
   cmdReboot(1, args);
   request->send(200, "text/plain", "Rebooting");
 }
-void systemStatus(AsyncWebServerRequest *request){
-  char *args[] = { "uptime", "memory", "temp", NULL };
-  cmdStatus(2, args);
-  String body;
-  for (int i = 0; args[i] != NULL; i++) {
-    body += args[i];
-    body += "\n";
-  }
-  request->send(200, "text/plain", body);
+void systemStatus(){
+  String temp_str = "temp: " + String(getTemp());
+  const char *temp = temp_str.c_str();
+  events.send(temp, "temperature", millis());
+  for (int j = 0; j < system_monitor_get_lines(buf, sizeof buf, lines, SYSMON_MAX_LINES); j++){ 
+      events.send(lines[j], "monitoringData", millis());
+    }
 }
 void armESC(AsyncWebServerRequest *request){
   char *args[] = { "esc", "arm", NULL };
@@ -88,6 +94,7 @@ void webApplication(void *pvParameters)
 
   char *webQueue[4];
   int count;
+  static uint32_t lastRun = 0;
 
 #if USE_ACCESS_POINT
   WiFi.softAP(AP_SSID, AP_PASS);
@@ -114,7 +121,7 @@ void webApplication(void *pvParameters)
   server.on("/state", handleState);
   // ---    Flight Control    --- //
   server.on("/reboot", reboot);
-  server.on("/systemstatus", systemStatus);
+  //server.on("/systemstatus", systemStatus);
   server.on("/esc/arm", armESC);
   server.on("/esc/disarm", disarmESC);
 
@@ -129,6 +136,12 @@ void webApplication(void *pvParameters)
     for(int i = 0; i < count; i++) {
       events.send(webQueue[i], "flightData", millis());
     }
+
+    if (millis() - lastRun >= 5000) {
+      lastRun = millis();
+      systemStatus();
+    }
+
     //vTaskDelay(pdMS_TO_TICKS(50));
   }
 }

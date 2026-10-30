@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mon_struts.h"
+
 constexpr int MAX_ARGS = 8;
 
 // --- Functions in main.ino --- //
@@ -19,12 +21,11 @@ static void cmdStatus(int, char ** argv) {
   String uptime = "uptime: " + String(millis()/1000);
   String mem = "free heap: " + String(ESP.getFreeHeap());
   String temp = "temp: " + String(getTemp());
+
+  Serial.println("-----------------------");
   Serial.println(uptime + " s");
   Serial.println(mem + " bytes");
   Serial.println(temp + " C");
-  argv[0] = strdup(uptime.c_str());
-  argv[1] = strdup(mem.c_str());
-  argv[2] = strdup(temp.c_str());
 }
 
 static void cmdReboot(int, char **) {

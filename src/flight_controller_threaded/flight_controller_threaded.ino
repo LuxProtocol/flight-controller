@@ -11,6 +11,7 @@
 // commands
 #include "commands.h"
 #include "webapp.h"
+#include "core_usage.h"
 
 #define BNO08X_RESET -1
 Adafruit_BNO08x bno08x(BNO08X_RESET);
@@ -98,9 +99,10 @@ int throttle_pwm = 1475;   // hover-ish baseline, tune for your build
 unsigned long lastMicros = 0;
 
 // ---------------- Threading ----------------
-TaskHandle_t FlightThread = NULL;
-TaskHandle_t CLIThread = NULL;
-TaskHandle_t WEBThread = NULL;
+TaskHandle_t FlightThread =       NULL;
+TaskHandle_t CLIThread =          NULL;
+TaskHandle_t WEBThread =          NULL;
+TaskHandle_t MonitoringThread =   NULL;
 //TaskHandle_t taskFloat2Handle = NULL;
 
 
@@ -121,7 +123,6 @@ static uint32_t droppedLogsWEB = 0;
 
 temperature_sensor_handle_t temp_handle = NULL;
 temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(10, 70);
-
 // ---------------- ^ Variable Settings ^ ----------------
 
 
@@ -473,7 +474,7 @@ void setup() {
       "WebApplication",             // name
       4096,                         // stack size (bytes) — increase if stack overflow occurs
       NULL,                         // parameter
-      2,                            // priority (higher = more urgent; was 1)
+      5,                            // priority (higher = more urgent; was 1)
       &WEBThread                    // handle
     );
   #endif
@@ -486,12 +487,20 @@ void setup() {
       "CommandLineInterface",       // name
       4096,                         // stack size (bytes) — increase if stack overflow occurs
       NULL,                         // parameter
-      1,                            // priority (higher = more urgent; was 1)
-      &CLIThread                   // handle
+      5,                            // priority (higher = more urgent; was 1)
+      &CLIThread                    // handle
     );
   #endif
 
-  // SMT Thread
+  // Thread Monitoring Thread
+  xTaskCreate(
+    monitor_task,                 // task function
+    "MonitoringTask",             // name
+    4096,                         // stack size (bytes) — increase if stack overflow occurs
+    NULL,                         // parameter
+    1,                            // priority (higher = more urgent; was 1)
+    &MonitoringThread             // handle
+  );
 
   // Flight Thread
   xTaskCreatePinnedToCore(

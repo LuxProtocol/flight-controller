@@ -115,7 +115,8 @@ struct LogMsg { char text[LOG_MSG_LEN]; };
 
 static QueueHandle_t logQueueCMD;
 static QueueHandle_t logQueueWEB;
-static uint32_t droppedLogs = 0;
+static uint32_t droppedLogsCMD = 0;
+static uint32_t droppedLogsWEB = 0;
 #define CMD_MAX 128
 
 temperature_sensor_handle_t temp_handle = NULL;
@@ -340,13 +341,31 @@ void logf(const char *fmt, ...) {
 
   // Timeout of 0 = never block the caller; drop the message if the queue is full
   if (xQueueSend(logQueueCMD, &msg, 0) != pdTRUE) {
-    __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
+    __atomic_add_fetch(&droppedLogsCMD, 1, __ATOMIC_RELAXED);
   }
-  //if (xQueueSend(logQueueWEB, &msg, 0) != pdTRUE) {
-  //  __atomic_add_fetch(&droppedLogs, 1, __ATOMIC_RELAXED);
-  //}
+  if (xQueueSend(logQueueWEB, &msg, 0) != pdTRUE) {
+    __atomic_add_fetch(&droppedLogsWEB, 1, __ATOMIC_RELAXED);
+  }
 }
 
+static int getFlightData(String *queue, int max){
+  LogMsg msg;
+  int index = 0;
+
+  if (xQueueReceive(logQueueWEB, &msg, pdMS_TO_TICKS(10)) == pdTRUE){
+    index++;
+    queue[0] = msg.text;
+    while (xQueueReceive(logQueueWEB, &msg, 0) == pdTRUE) {
+      if(index>max){break;}
+      queue[index] = msg.text; 
+      index++;
+    }
+  }
+
+  uint32_t dropped = __atomic_exchange_n(&droppedLogsWEB, 0, __ATOMIC_RELAXED);
+  if (dropped) Serial.printf("[web-logger] dropped %u messages\n", dropped);
+  return index;
+}
 
 #ifdef ENABLE_SERIAL_CMDS
 void commandLineInterface(void *pvParameters) {
@@ -365,8 +384,8 @@ void commandLineInterface(void *pvParameters) {
     }
 
     // --- Count messages not sent ---
-    uint32_t dropped = __atomic_exchange_n(&droppedLogs, 0, __ATOMIC_RELAXED);
-    if (dropped) Serial.printf("[logger] dropped %u messages\n", dropped);
+    uint32_t dropped = __atomic_exchange_n(&droppedLogsCMD, 0, __ATOMIC_RELAXED);
+    if (dropped) Serial.printf("[cmd-logger] dropped %u messages\n", dropped);
 
     // --- Handle incoming serial data ---
     while (Serial.available()) {
@@ -424,9 +443,9 @@ void flightController(void *pvParameters) {
       if(debug){
         // Display IMU Readings
         logf("Orientation: %.4f, %.4f, %.4f", currentYaw, currentPitch, currentRoll);
-
         // Display Motor Vectors
         logf("Motor: %d, %d, %d, %d", m.FL, m.FR, m.RL, m.RR);
+        // 
       }
     }
     counter++;

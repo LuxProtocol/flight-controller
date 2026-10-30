@@ -26,6 +26,7 @@ bool ledState = false;
 
 void handleRoot() { server.send_P(200, "text/html", PAGE); }
 void handleState() { server.send(200, "text/plain", ledState ? "ON" : "OFF"); }
+static int getFlightData(String * queue, int max);
 
 /*void handleToggle()
 {
@@ -83,6 +84,9 @@ void webApplication(void *pvParameters)
   pinMode(togglePin, OUTPUT);
   digitalWrite(togglePin, LOW);
 
+  String webQueue[8];
+  int count;
+
 #if USE_ACCESS_POINT
   WiFi.softAP(AP_SSID, AP_PASS);
   Serial.print("Connect to Wi-Fi '");
@@ -114,5 +118,13 @@ void webApplication(void *pvParameters)
 
   server.begin();
 
-  for(;;){server.handleClient();}
+  for(;;){
+    server.handleClient();
+
+
+    count = getFlightData(webQueue, 8);
+    for(int i = 0; i < count; i++) {
+      server.send(200, "text/plain", webQueue[i]);
+    }
+  }
 }

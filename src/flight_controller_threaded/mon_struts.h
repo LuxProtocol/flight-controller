@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+// mon_struts means "Monitor Structs"
+
 #ifndef SYSMON_MAX_TASKS
 #define SYSMON_MAX_TASKS 40     // size of the per-task table
 #endif

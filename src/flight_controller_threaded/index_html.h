@@ -44,6 +44,17 @@ const char PAGE[] PROGMEM = R"rawliteral(
 .table-wrap{max-height:280px;overflow:auto;margin-top:12px;border:1px solid var(--line);border-radius:10px}.tasks table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}.tasks th,.tasks td{padding:7px 12px;text-align:right;white-space:nowrap}.tasks th:first-child,.tasks td:first-child{text-align:left}.tasks thead th{position:sticky;top:0;background:var(--surface);color:var(--muted);font-weight:600;font-size:11px}.tasks tbody tr+tr td{border-top:1px solid var(--line)}.tasks tr.low td:nth-child(5){color:var(--err);font-weight:600}
 :root[data-layout="phone"] .mon-grid{grid-template-columns:1fr}@media(max-width:680px){:root:not([data-layout="laptop"]) .mon-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* ---- Vision window (added) ---- */
+.vision{grid-column:1/-1}
+.vision-body{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;margin:22px 0 14px}
+.vision-view{position:relative;border:1px solid var(--line);border-radius:12px;background:#000;overflow:hidden;line-height:0;max-width:560px;width:100%;justify-self:center}
+.vision-view canvas{display:block;width:100%;height:auto;transition:opacity .2s}
+.vision-view.stale canvas{opacity:.45}
+.vision-list{list-style:none;margin:0;padding:0;display:grid;gap:8px;align-content:start}
+.vision-list li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 13px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--c,var(--accent));border-radius:8px;font-size:13px;font-variant-numeric:tabular-nums}
+.vision-list li span{color:var(--muted);font-size:12px;white-space:nowrap}
+:root[data-layout="phone"] .vision-body{grid-template-columns:1fr}
+@media(max-width:680px){:root:not([data-layout="laptop"]) .vision-body{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -69,6 +80,14 @@ const char PAGE[] PROGMEM = R"rawliteral(
 <div class="panel-head"><div><p class="eyebrow">Flight system</p><h2 id="esc-title">ESC control</h2></div><span class="number">02</span></div>
 <div class="esc-visual"><div><span class="esc-symbol" aria-hidden="true">✣</span><div class="state-label">Controller arm state</div><div id="esc-state" class="state-value" aria-live="polite">Disarmed</div></div><button id="esc" class="switch" role="switch" aria-checked="false" aria-labelledby="esc-title" disabled></button></div>
 <p class="esc-note">Arming enables motor output.</p><p id="esc-msg" class="msg" role="status"></p>
+</section>
+<section class="panel vision" aria-labelledby="vision-title">
+<div class="panel-head"><div><p class="eyebrow">Vision</p><h2 id="vision-title">Camera &amp; detections</h2></div><span id="vision-tag" class="live-tag">Awaiting stream</span></div>
+<div class="vision-body">
+<div id="vision-view" class="vision-view stale"><canvas id="vision-canvas" width="240" height="240" role="img" aria-label="Live camera image with detected objects and a center crosshair"></canvas></div>
+<ul id="vision-list" class="vision-list"><li>No detections<span></span></li></ul>
+</div>
+<p id="vision-meta" class="hint mono">Last frame: —</p>
 </section>
 <section class="panel flight" aria-labelledby="flight-title">
 <div class="panel-head"><div><p class="eyebrow">Flight data</p><h2 id="flight-title">Attitude &amp; motor output</h2></div><span id="flight-tag" class="live-tag">Awaiting stream</span></div>
@@ -511,6 +530,115 @@ stream.addEventListener(TEMP_EVENT, e => {
 stream.addEventListener(MONITOR_EVENT, e => {
   for (const line of String(e.data).split("\n")) if (line.trim()) handleMonitorLine(line.trim());
 });
+</script>
+<script>
+// ---- Vision window (added): camera image, bounding boxes and a center crosshair ----
+(function () {
+  // Frames come from the Web-ESP relay as binary WebSocket messages:
+  //   [u32 LE jsonLen][json][jpeg]   json = {"boxes":[[x,y,w,h,score,target],...],"classes":[[target,score],...],"fps":..,"inf":..}
+  // If this page is served by a different device than the relay, use e.g. "ws://192.168.4.1/ws".
+  const VISION_WS_URL = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws";
+  const LABELS = ["person"];          // class names for your model, by index
+  const STALE_MS = 3000;              // no frame for this long = stream stalled
+  const COLORS = ["#ff5252", "#40c4ff", "#69f0ae", "#ffd740", "#e040fb", "#ff6e40"];
+
+  const q = id => document.getElementById(id);
+  const cv = q("vision-canvas"), ctx = cv.getContext("2d");
+  let ws, pending = null, busy = false, lastRx = 0, tag = "", retry = 1000;
+
+  function idle() {
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#8a8a8a"; ctx.font = "12px system-ui, sans-serif"; ctx.textBaseline = "alphabetic";
+    ctx.fillText("Waiting for camera…", 12, cv.height - 12);
+  }
+  idle();
+
+  function connect() {
+    ws = new WebSocket(VISION_WS_URL);
+    ws.binaryType = "arraybuffer";
+    ws.onopen = () => { retry = 1000; };
+    ws.onclose = () => { setTimeout(connect, retry); retry = Math.min(retry * 2, 8000); };
+    ws.onmessage = e => {
+      if (document.hidden || typeof e.data === "string") return;   // skip work in background tabs
+      pending = e.data;                                            // keep only the newest frame
+      if (!busy) render();
+    };
+  }
+
+  async function render() {
+    busy = true;
+    while (pending) {
+      const buf = pending; pending = null;
+      try {
+        const jl = new DataView(buf).getUint32(0, true);
+        const meta = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, jl)));
+        const bmp = await createImageBitmap(new Blob([new Uint8Array(buf, 4 + jl)], {type: "image/jpeg"}));
+        draw(bmp, meta);
+        bmp.close();
+        lastRx = performance.now();
+      } catch (err) { console.warn("Bad vision frame", err); }
+    }
+    busy = false;
+  }
+
+  function crosshair(cx, cy, W, lw, color) {
+    const arm = W * 0.06, gap = W * 0.015;
+    const cross = (style, width) => {
+      ctx.strokeStyle = style; ctx.lineWidth = width; ctx.beginPath();
+      ctx.moveTo(cx - arm, cy); ctx.lineTo(cx - gap, cy); ctx.moveTo(cx + gap, cy); ctx.lineTo(cx + arm, cy);
+      ctx.moveTo(cx, cy - arm); ctx.lineTo(cx, cy - gap); ctx.moveTo(cx, cy + gap); ctx.lineTo(cx, cy + arm);
+      ctx.stroke();
+    };
+    cross("rgba(0,0,0,.65)", lw + 2);   // dark outline so it stays visible on any image
+    cross(color, lw);
+    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(cx, cy, lw * .8, 0, 7); ctx.fill();
+  }
+
+  function draw(bmp, m) {
+    if (cv.width !== bmp.width || cv.height !== bmp.height) { cv.width = bmp.width; cv.height = bmp.height; }
+    const W = cv.width, H = cv.height, cx = W / 2, cy = H / 2;
+    const lw = Math.max(2, W / 200), fs = Math.max(11, W / 22);
+    ctx.drawImage(bmp, 0, 0);
+    ctx.lineWidth = lw; ctx.font = fs + "px system-ui, sans-serif"; ctx.textBaseline = "top";
+
+    const list = q("vision-list");
+    const rows = [];
+    for (const [x, y, w, h, s, t] of (m.boxes || [])) {
+      const c = COLORS[t % COLORS.length], name = LABELS[t] ?? "class " + t;
+      const left = x - w / 2, top = y - h / 2;                     // x,y are the box centre
+      ctx.strokeStyle = c; ctx.strokeRect(left, top, w, h);
+      const label = name + " " + s + "%", tw = ctx.measureText(label).width + 6, ly = Math.max(0, top - fs - 2);
+      ctx.fillStyle = c; ctx.fillRect(left, ly, tw, fs + 2);
+      ctx.fillStyle = "#000"; ctx.fillText(label, left + 3, ly + 1);
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, lw * 1.5, 0, 7); ctx.fill();   // box centre
+      const dx = Math.round(x - cx), dy = Math.round(y - cy), sg = n => (n > 0 ? "+" : "") + n;
+      rows.push([c, name + " " + s + "%", "Δx " + sg(dx) + "  Δy " + sg(dy)]);           // offset from crosshair, +x right, +y down
+    }
+    for (const [t, s] of (m.classes || [])) rows.push([COLORS[t % COLORS.length], (LABELS[t] ?? "class " + t) + " " + s + "%", "class"]);
+
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ffffff";
+    crosshair(cx, cy, W, lw, accent);                              // drawn last so it sits on top
+
+    list.replaceChildren(...(rows.length ? rows : [["", "No detections", ""]]).map(([c, a, b]) => {
+      const li = document.createElement("li"), sp = document.createElement("span");
+      if (c) li.style.setProperty("--c", c);
+      li.append(a); sp.textContent = b; li.append(sp);
+      return li;
+    }));
+    q("vision-meta").textContent = "Last frame: " + W + "×" + H + " · " + (m.boxes || []).length + " box" + ((m.boxes || []).length === 1 ? "" : "es");
+    q("vision-tag").textContent = tag = "Live · " + m.fps + " fps · inference " + m.inf + " ms";
+    q("vision-view").classList.remove("stale");
+  }
+
+  setInterval(() => {
+    if (lastRx && performance.now() - lastRx > STALE_MS) {
+      q("vision-view").classList.add("stale");
+      if (tag !== "Stream stalled") q("vision-tag").textContent = tag = "Stream stalled";
+    }
+  }, 500);
+
+  connect();
+})();
 </script>
 </body>
 </html>

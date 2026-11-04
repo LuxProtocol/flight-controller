@@ -8,6 +8,7 @@
 //#include "commands.h"
 #include "index_html.h"
 #include "mon_struts.h"
+#include "img_struts.h"
 
 #define togglePin 4
 #define high 1
@@ -32,6 +33,7 @@ static char *lines[SYSMON_MAX_LINES];
 
 AsyncWebServer server(80);
 AsyncEventSource events("/events");
+AsyncWebSocket ws("/ws");
 bool ledState = false;
 
 void handleRoot(AsyncWebServerRequest *request) { request->send_P(200, "text/html", PAGE); }
@@ -86,6 +88,49 @@ void disarmESC(AsyncWebServerRequest *request){
 
 // new ^^^
 
+// ---    AI Streaming      --- //
+#define MAX_FRAME_BYTES (256 * 1024)
+static void onIngestBody(AsyncWebServerRequest *r, uint8_t *data, size_t len,
+                         size_t index, size_t total) {
+  if (index == 0) {
+    if (total < 16 || total > MAX_FRAME_BYTES) return;     // leaves _tempObject null
+    r->_tempObject = allocBuf(total);                      // freed by the request if unused
+  }
+  if (r->_tempObject) memcpy((uint8_t *)r->_tempObject + index, data, len);
+}
+static void onIngest(AsyncWebServerRequest *r) {
+  uint8_t *msg = (uint8_t *)r->_tempObject;
+  size_t total = r->contentLength();
+  if (!msg) { r->send(400, "text/plain", "bad size"); return; }
+
+  uint32_t jl;
+  memcpy(&jl, msg, 4);
+  if ((size_t)jl + 4 >= total) { r->send(400, "text/plain", "bad header"); return; }
+
+  r->_tempObject = nullptr;                                // take ownership of the buffer
+  auto f = std::make_shared<Frame>();
+  f->msg = msg;
+  f->msgLen = total;
+  f->jsonLen = jl;
+  f->jpegOff = 4 + jl;
+  f->jpegLen = total - 4 - jl;
+  f->id = ++frameCounter;
+  latest = f;
+  framesIn++;
+
+  // Relay to every browser. Drop the frame if some client's queue is full.
+  if (ws.count() && ws.availableForWriteAll()) ws.binaryAll(f->msg, f->msgLen);
+
+  r->send(204);
+}
+
+static void onWsEvent(AsyncWebSocket *, AsyncWebSocketClient *client, AwsEventType type,
+                      void *, uint8_t *, size_t) {
+  if (type == WS_EVT_CONNECT && latest)                    // show something immediately
+    client->binary(latest->msg, latest->msgLen);
+}
+// ---    AI Streaming      --- //
+
 void webApplication(void *pvParameters)
 {
   Serial.begin(115200);
@@ -125,12 +170,41 @@ void webApplication(void *pvParameters)
   server.on("/esc/arm", armESC);
   server.on("/esc/disarm", disarmESC);
 
+
+  // ---    AI Streaming      --- //
+  ws.onEvent(onWsEvent);
+  server.addHandler(&ws);
+  server.on("/ingest", HTTP_POST, onIngest, nullptr, onIngestBody);
+  server.on("/snapshot.jpg", HTTP_GET, [](AsyncWebServerRequest *r) {
+    FramePtr f = latest;
+    if (!f) { r->send(503, "text/plain", "No frame yet"); return; }
+    AsyncWebServerResponse *res = r->beginResponse(
+        "image/jpeg", f->jpegLen,
+        [f](uint8_t *buf, size_t maxLen, size_t index) -> size_t {   // f keeps frame alive
+          size_t n = std::min(maxLen, f->jpegLen - index);
+          memcpy(buf, f->msg + f->jpegOff + index, n);
+          return n;
+        });
+    res->addHeader("Cache-Control", "no-store");
+    r->send(res);
+  });
+  server.on("/results.json", HTTP_GET, [](AsyncWebServerRequest *r) {
+    FramePtr f = latest;
+    if (!f) { r->send(503, "text/plain", "No frame yet"); return; }
+    String s;
+    s.concat((const char *)f->msg + 4, f->jsonLen);
+    AsyncWebServerResponse *res = r->beginResponse(200, "application/json", s);
+    res->addHeader("Cache-Control", "no-store");
+    r->send(res);
+  });
+  // ---    AI Streaming      --- //
+
   server.addHandler(&events);
   server.begin();
 
   for(;;){
     //server.handleClient();
-
+    ws.cleanupClients();
 
     count = getFlightData(webQueue, 2);
     for(int i = 0; i < count; i++) {

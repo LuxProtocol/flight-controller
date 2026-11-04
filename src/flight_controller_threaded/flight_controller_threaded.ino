@@ -12,6 +12,7 @@
 #include "commands.h"
 #include "webapp.h"
 #include "core_usage.h"
+#include "notes.h"
 
 #define BNO08X_RESET -1
 Adafruit_BNO08x bno08x(BNO08X_RESET);
@@ -38,7 +39,7 @@ sh2_SensorValue_t sensorValue;
 #define ENABLE_ROLL_CORRECTION      1
 #define ENABLE_PITCH_CORRECTION     1
 #define ENABLE_YAW_CORRECTION       0
-#define DEBUG_PRINT                 0
+#define DEBUG_PRINT                 1
 #define ENABLE_SERIAL_CMDS          1
 #define ENABLE_WEB                  1
 #define ENABLE_MOTORS               1
@@ -136,10 +137,6 @@ void setupIMU() {
 }
 // ---------------- BNO085 setup ----------------
 
-
-
-
-
 // ---------------- ESC setup ----------------
 void setupESC() {
   ledcAttach(FL_M, PWM_FREQUENCY, PWM_RESOLUTION);
@@ -224,9 +221,11 @@ float computePID(float error, float measuredRate, float dt,
                   PIDGains &g, PIDState &s) {
   float P = g.kp * error;
 
+  if (armed){
   s.integral = error * dt + constrain(s.integral, -25, 25); // was +=
   s.integral = constrain(s.integral, -s.integralMax, s.integralMax);
-  float I = 0;//g.ki * s.integral;
+  } else s.integral = 0;
+  float I = g.ki * s.integral;
 
   float D = -g.kd * measuredRate;
 
@@ -370,7 +369,7 @@ static int getFlightData(char **queue, int max){
   return index;
 }
 
-#ifdef ENABLE_SERIAL_CMDS
+#if ENABLE_SERIAL_CMDS
 void commandLineInterface(void *pvParameters) {
   LogMsg msg;
   char   line[CMD_LINE_LEN];
@@ -433,14 +432,14 @@ void flightController(void *pvParameters) {
   m = computeMotorOutputs(desiredX, desiredY, desiredZ);
 
   // Write PWM to ESCs
-  #ifdef ENABLE_MOTORS
+  #if ENABLE_MOTORS
     ledcWrite(FL_M, m.FL);
     ledcWrite(FR_M, m.FR);
     ledcWrite(RL_M, m.RL);
     ledcWrite(RR_M, m.RR);
   #endif
 
-  #ifdef DEBUG_PRINT
+  #if DEBUG_PRINT
     if(counter>5){
       counter=0;
       // Display IMU Readings
@@ -467,7 +466,10 @@ void setup() {
   setupESC();
   temperature_sensor_install(&temp_sensor_config, &temp_handle);
 
-  #ifdef ENABLE_WEB
+  // Notify user drone is ready:
+  setupTune();
+
+  #if ENABLE_WEB
     logQueueWEB = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
     xTaskCreate(
       webApplication,               // task function
@@ -480,7 +482,7 @@ void setup() {
   #endif
 
   // Serial Thread
-  #ifdef ENABLE_SERIAL_CMDS
+  #if ENABLE_SERIAL_CMDS
     logQueueCMD = xQueueCreate(LOG_QUEUE_LEN, sizeof(LogMsg));
     xTaskCreate(
       commandLineInterface,         // task function

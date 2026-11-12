@@ -166,9 +166,18 @@ void webApplication(void *pvParameters)
   server.on("/state", handleState);
   // ---    Flight Control    --- //
   server.on("/reboot", reboot);
-  //server.on("/systemstatus", systemStatus);
   server.on("/esc/arm", armESC);
   server.on("/esc/disarm", disarmESC);
+
+  // ---    Attachments       --- //
+  //server.on("/acc/get", getAttachments);              // get list of installed attachments
+  //server.on("/acc/light/toggle", handleToggle);       // toggle light attachment(s)
+  //server.on("/acc/env/health", envHealth);            // response health of environmental module(s)
+  //server.on("/acc/env/data", handleEnvironmental);    // return environmental sensor data
+  //server.on("/acc/ai/health", aiHealth);              // response health of ai module(s)
+  //server.on("/acc/ai/data", aiData);                  // accepts data from ai modules
+
+  
 
 
   // ---    AI Streaming      --- //

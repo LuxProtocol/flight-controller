@@ -17,10 +17,10 @@ const char PAGE[] PROGMEM = R"rawliteral(
 .preferences{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:0 0 24px}.theme-picker{display:flex;flex-wrap:wrap;max-width:100%;align-items:center;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.theme-picker button,.layout-toggle{font-size:12px;min-height:40px;border-radius:7px;padding:8px 14px;background:transparent;color:var(--muted);border:1px solid transparent;font-weight:600}.theme-picker button[aria-pressed="true"]{background:var(--surface);color:var(--ink);border-color:var(--edge)}.theme-picker button::before{content:"";display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#c19aff}.theme-picker button[data-theme="light"]::before{background:#087568}.theme-picker button[data-theme="dark"]::before{background:#c8ced8}.layout-toggle{color:var(--ink);background:var(--panel);border-color:var(--line)}.layout-toggle:hover{border-color:var(--accent)}
 :root[data-layout="laptop"] .shell{min-width:960px}
 :root[data-layout="laptop"] .preferences{max-width:calc(100vw - 80px)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,sans-serif}button{font:inherit}button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:5px}button{cursor:pointer}button:disabled{opacity:.45;cursor:wait}button:hover:not(:disabled){filter:brightness(1.13)}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Segoe UI",system-ui,sans-serif}button{font:inherit}button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:5px}button{cursor:pointer}button:disabled{opacity:.45;cursor:wait}button:hover:not(:disabled){filter:brightness(1.13)}
 .shell{max-width:1160px;margin:auto;padding:0 40px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:92px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:13px;font-size:16px;font-weight:650;letter-spacing:.02em}.mark{display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--edge);border-radius:10px;color:var(--accent);font-size:23px}.brand small{display:block;font-size:10px;letter-spacing:.18em;color:var(--muted);font-weight:500}.connection{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted)}.dot{width:7px;height:7px;border-radius:50%;background:#8390a1}.connection[data-state="online"] .dot{background:var(--accent)}.connection[data-state="offline"] .dot{background:var(--err)}
 .intro{padding:48px 0 30px;display:flex;justify-content:space-between;gap:24px;align-items:end}.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.18em;color:var(--accent);font-weight:650;margin:0 0 9px}h1{font-size:clamp(28px,4vw,38px);line-height:1.2;font-weight:550;letter-spacing:-.035em;margin:0 0 12px}.subtitle{color:var(--muted);margin:0}.device{font-size:11px;text-align:right;color:var(--muted);line-height:1.8;white-space:nowrap}.device strong{color:var(--ink);font-weight:500}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}.panel-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.panel h2{font-size:18px;font-weight:550;margin:1px 0 0;letter-spacing:-.02em}.number{font:11px monospace;color:var(--muted)}.hint{color:var(--muted);font-size:12px;margin:0}.visual{min-height:195px;display:flex;align-items:center;justify-content:center;gap:32px}.lamp{width:92px;height:92px;border:1px solid var(--edge);border-radius:50%;display:grid;place-items:center;color:var(--lamp-ink);background:var(--lamp-bg);transition:background .2s,color .2s,box-shadow .2s}.lamp svg{width:36px;height:36px}.lamp.on{color:var(--lamp-on-ink);background:var(--lamp-on-bg);border-color:var(--lamp-on-edge);box-shadow:0 0 50px #55d8be12}.state-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}.state-value{font-size:25px;font-weight:500;line-height:1.5}.state-note{font-size:11px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px}.panel.wide{grid-column:1/-1}.panel-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.panel h2{font-size:18px;font-weight:550;margin:1px 0 0;letter-spacing:-.02em}.number{font:11px monospace;color:var(--muted);white-space:nowrap}.hint{color:var(--muted);font-size:12px;margin:0}.visual{min-height:195px;display:flex;align-items:center;justify-content:center;gap:32px}.lamp{width:92px;height:92px;border:1px solid var(--edge);border-radius:50%;display:grid;place-items:center;color:var(--lamp-ink);background:var(--lamp-bg);transition:background .2s,color .2s,box-shadow .2s}.lamp svg{width:36px;height:36px}.lamp.on{color:var(--lamp-on-ink);background:var(--lamp-on-bg);border-color:var(--lamp-on-edge);box-shadow:0 0 50px #55d8be12}.state-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}.state-value{font-size:25px;font-weight:500;line-height:1.5}.state-note{font-size:11px;color:var(--muted)}
 .primary,.secondary{width:100%;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:650;border:1px solid transparent}.primary{background:var(--accent);color:var(--primary-ink)}.secondary{background:var(--surface);color:var(--ink);border-color:var(--edge)}.msg{font-size:12px;color:var(--err);min-height:20px;margin:9px 0 0}.msg.ok{color:var(--accent)}
 .secondary[aria-busy="true"]::before{content:"";display:inline-block;width:.9em;height:.9em;margin-right:.6em;vertical-align:-.1em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .esc-visual{min-height:195px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 8px}.esc-symbol{color:var(--muted);display:block;font-size:26px;margin-bottom:10px;line-height:1}.switch{position:relative;flex:none;width:64px;height:36px;padding:0;border:1px solid var(--edge);border-radius:30px;background:var(--track);transition:background .25s,border-color .25s,box-shadow .25s}.switch::after{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:50%;background:var(--knob);box-shadow:0 1px 4px #0006;transition:transform .35s cubic-bezier(.3,1.5,.5,1),width .15s,background .25s}.switch:active::after{width:32px}.switch[aria-checked="true"]{background:#4d2728;border-color:#bd6e63;box-shadow:0 0 22px -6px #ff7a6e}.switch[aria-checked="true"]::after{transform:translateX(28px);background:#ffb1a4}.switch[aria-checked="true"]:active::after{transform:translateX(22px)}.esc-note{font-size:12px;margin:0;padding:11px 14px;border:1px solid var(--edge);border-radius:8px;color:var(--muted);background:var(--surface)}
@@ -44,7 +44,7 @@ const char PAGE[] PROGMEM = R"rawliteral(
 .table-wrap{max-height:280px;overflow:auto;margin-top:12px;border:1px solid var(--line);border-radius:10px}.tasks table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}.tasks th,.tasks td{padding:7px 12px;text-align:right;white-space:nowrap}.tasks th:first-child,.tasks td:first-child{text-align:left}.tasks thead th{position:sticky;top:0;background:var(--surface);color:var(--muted);font-weight:600;font-size:11px}.tasks tbody tr+tr td{border-top:1px solid var(--line)}.tasks tr.low td:nth-child(5){color:var(--err);font-weight:600}
 :root[data-layout="phone"] .mon-grid{grid-template-columns:1fr}@media(max-width:680px){:root:not([data-layout="laptop"]) .mon-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-/* ---- Vision window (added) ---- */
+/* ---- Vision panels (one per installed AI module) ---- */
 .vision{grid-column:1/-1}
 .vision-body{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;margin:22px 0 14px}
 .vision-view{position:relative;border:1px solid var(--line);border-radius:12px;background:#000;overflow:hidden;line-height:0;max-width:560px;width:100%;justify-self:center}
@@ -55,13 +55,20 @@ const char PAGE[] PROGMEM = R"rawliteral(
 .vision-list li span{color:var(--muted);font-size:12px;white-space:nowrap}
 :root[data-layout="phone"] .vision-body{grid-template-columns:1fr}
 @media(max-width:680px){:root:not([data-layout="laptop"]) .vision-body{grid-template-columns:1fr}}
+/* ---- Environment panel + module status table ---- */
+.env-text{margin:22px 0 14px;min-height:150px;max-height:260px;overflow:auto;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font:13px/1.6 Consolas,Monaco,monospace;white-space:pre-wrap;word-break:break-word;transition:opacity .2s}
+.env-text.stale{opacity:.5}
+.empty-note{min-height:150px;display:grid;place-content:center;gap:4px;margin:22px 0 4px;text-align:center}.empty-note b{font-size:18px;font-weight:500}
+.modules{border-top:1px solid var(--line);padding:20px 0 22px}.modules h3{margin:0 0 12px;font-size:11px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.modules .table-wrap{margin-top:0}.modules table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}.modules th,.modules td{padding:8px 12px;text-align:left;white-space:nowrap}.modules thead th{background:var(--surface);color:var(--muted);font-weight:600;font-size:11px}.modules tbody tr+tr td{border-top:1px solid var(--line)}.modules tr.empty td{color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:7px}.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:#8390a1}.pill.ok::before{background:var(--accent)}.pill.bad{color:var(--err);font-weight:600}.pill.bad::before{background:var(--err)}
 </style>
 </head>
 <body>
 <div class="shell">
 <header class="topbar"><div class="brand"><span class="mark" aria-hidden="true">⌁</span><div>AERIAL MATRIX<small>CONTROL SYSTEMS</small></div></div><div id="connection" class="connection" data-state="waiting" role="status"><span class="dot" aria-hidden="true"></span><span id="connection-text">Connecting…</span></div></header>
 <main>
-<div class="intro"><div><p class="eyebrow">Device console</p><h1>Controller overview</h1><p class="subtitle">Flight systems and lighting, in one place.</p></div><div class="device">CONTROL INTERFACE<br><strong>ESP32 · Local network</strong></div></div>
+<div class="intro"><div><p class="eyebrow">Device console</p><h1>Controller overview</h1><p class="subtitle">Flight systems and attachments, in one place.</p></div><div class="device">CONTROL INTERFACE<br><strong>ESP32 · Local network</strong></div></div>
 <div class="preferences" aria-label="Display preferences">
 <div class="theme-picker" role="group" aria-label="Color theme">
 <button id="theme-purple" type="button" data-theme="purple" aria-pressed="true">Purple (LP natural)</button>
@@ -70,26 +77,37 @@ const char PAGE[] PROGMEM = R"rawliteral(
 </div>
 <button id="layout-toggle" class="layout-toggle" type="button">Use phone layout</button>
 </div>
-<div class="grid">
-<section class="panel" aria-labelledby="light-title">
-<div class="panel-head"><div><p class="eyebrow">Attachment</p><h2 id="light-title">Lighting control</h2></div><span class="number">01</span></div>
-<div class="visual"><div id="lamp" class="lamp" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 22c0-5-5-5-5-12a10 10 0 0 1 20 0c0 7-5 7-5 12zM12 26h8M14 30h4M12 22v-8m8 8v-8m-8 0 4 3 4-3" transform="translate(0 1) scale(1 .9)"/></svg></div><div><div class="state-label">Light state</div><div id="state" class="state-value" aria-live="polite">Unknown</div><div class="state-note">Synced with the controller</div></div></div>
+<div class="grid" id="grid">
+<section class="panel half" id="light-panel" aria-labelledby="light-title" hidden>
+<div class="panel-head"><div><p class="eyebrow">Attachment</p><h2 id="light-title">Lighting control</h2></div><span id="light-port" class="number"></span></div>
+<div class="visual"><div id="lamp" class="lamp" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 22c0-5-5-5-5-12a10 10 0 0 1 20 0c0 7-5 7-5 12zM12 26h8M14 30h4M12 22v-8m8 8v-8m-8 0 4 3 4-3" transform="translate(0 1) scale(1 .9)"/></svg></div><div><div class="state-label">Light state</div><div id="state" class="state-value" aria-live="polite">Unknown</div><div class="state-note">Updates when toggled from this console</div></div></div>
 <button id="btn" class="primary" disabled>Toggle light</button><p id="msg" class="msg" role="status"></p>
 </section>
-<section class="panel" aria-labelledby="esc-title">
-<div class="panel-head"><div><p class="eyebrow">Flight system</p><h2 id="esc-title">ESC control</h2></div><span class="number">02</span></div>
+<section class="panel half" id="esc-panel" aria-labelledby="esc-title">
+<div class="panel-head"><div><p class="eyebrow">Flight system</p><h2 id="esc-title">ESC control</h2></div></div>
 <div class="esc-visual"><div><span class="esc-symbol" aria-hidden="true">✣</span><div class="state-label">Controller arm state</div><div id="esc-state" class="state-value" aria-live="polite">Disarmed</div></div><button id="esc" class="switch" role="switch" aria-checked="false" aria-labelledby="esc-title" disabled></button></div>
 <p class="esc-note">Arming enables motor output.</p><p id="esc-msg" class="msg" role="status"></p>
 </section>
-<section class="panel vision" aria-labelledby="vision-title">
-<div class="panel-head"><div><p class="eyebrow">Vision</p><h2 id="vision-title">Camera &amp; detections</h2></div><span id="vision-tag" class="live-tag">Awaiting stream</span></div>
-<div class="vision-body">
-<div id="vision-view" class="vision-view stale"><canvas id="vision-canvas" width="240" height="240" role="img" aria-label="Live camera image with detected objects and a center crosshair"></canvas></div>
-<ul id="vision-list" class="vision-list"><li>No detections<span></span></li></ul>
-</div>
-<p id="vision-meta" class="hint mono">Last frame: —</p>
+<section class="panel half" id="env-panel" aria-labelledby="env-title" hidden>
+<div class="panel-head"><div><p class="eyebrow">Attachment · <span id="env-addr"></span></p><h2 id="env-title">Environment sensor</h2></div><span id="env-port" class="number"></span></div>
+<pre id="env-text" class="env-text stale" aria-live="polite">Waiting for data…</pre>
+<p id="env-meta" class="hint mono">Last update: —</p>
 </section>
-<section class="panel flight" aria-labelledby="flight-title">
+<section class="panel half" id="no-attach" aria-labelledby="no-attach-title">
+<div class="panel-head"><div><p class="eyebrow">Attachments</p><h2 id="no-attach-title">Ports</h2></div></div>
+<div class="empty-note"><b id="no-attach-head">Scanning…</b><span id="no-attach-text" class="hint">Waiting for the controller’s attachment scan.</span></div>
+</section>
+<template id="vision-tpl">
+<section class="panel vision wide" hidden>
+<div class="panel-head"><div><p class="eyebrow v-eyebrow">Attachment</p><h2 class="v-title">Camera</h2></div><span class="live-tag v-tag">Awaiting stream</span></div>
+<div class="vision-body">
+<div class="vision-view stale"><canvas width="240" height="240" role="img" aria-label="Live camera image with a center crosshair and the target offset"></canvas></div>
+<ul class="vision-list"><li>No target data<span></span></li></ul>
+</div>
+<p class="hint mono v-meta">Last frame: —</p>
+</section>
+</template>
+<section class="panel flight" id="flight-panel" aria-labelledby="flight-title">
 <div class="panel-head"><div><p class="eyebrow">Flight data</p><h2 id="flight-title">Attitude &amp; motor output</h2></div><span id="flight-tag" class="live-tag">Awaiting stream</span></div>
 <div class="flight-body">
 <div class="drone-view"><canvas id="drone" role="img" aria-label="Live 3D view of the drone’s attitude"></canvas></div>
@@ -100,6 +118,10 @@ const char PAGE[] PROGMEM = R"rawliteral(
 <section class="panel telemetry" aria-labelledby="system-title">
 <div class="panel-head"><div><p class="eyebrow">System telemetry</p><h2 id="system-title">Controller health</h2></div><span id="updated" class="live-tag">Awaiting device</span></div>
 <dl id="stats" class="stats stale"><div class="metric"><dt>Uptime</dt><dd id="uptime">—</dd></div><div class="metric"><dt>CPU load</dt><dd id="cpu">—</dd></div><div class="metric"><dt>Available memory</dt><dd id="heap">—</dd></div><div class="metric"><dt>Chip temperature</dt><dd id="temp">—</dd></div></dl>
+<div class="modules">
+<h3>Modules</h3>
+<div class="table-wrap"><table><thead><tr><th>Port</th><th>Module</th><th>Address</th><th>Link</th><th>Last response</th></tr></thead><tbody id="modules"><tr class="empty"><td colspan="5">Waiting for attachment scan…</td></tr></tbody></table></div>
+</div>
 <div id="monitor" class="monitor stale">
 <div class="mon-grid">
 <div class="mon-block"><h3>CPU load</h3><div id="cores"><p class="hint">Awaiting data…</p></div></div>
@@ -157,8 +179,24 @@ applyTheme(storedPreference("theme"));
 applyLayout();
 compactScreen.addEventListener("change", () => { if (layoutChoice === "auto") applyLayout(); });
 
-// How often the connection and light state are checked, in milliseconds.
+// How often the connection indicator and module table are refreshed, in milliseconds.
 const STATUS_INTERVAL_MS = 1000;
+
+// ---- Live stream: one server-sent-events connection carries all controller data ----
+const STREAM_URL = "/events";        // AsyncEventSource path on the main controller
+const STREAM_STALE_MS = 8000;        // the controller sends status every 2.5 s; silence this long = disconnected
+let stream = null, lastStreamMsg = 0, lastReopen = 0;
+const streamHandlers = [];
+const noteAlive = () => { lastStreamMsg = performance.now(); };
+function onStream(name, fn) { streamHandlers.push([name, fn]); stream.addEventListener(name, fn); }
+function openStream() {
+  if (stream) stream.close();
+  stream = new EventSource(STREAM_URL);
+  for (const [name, fn] of streamHandlers) stream.addEventListener(name, fn);
+  stream.onerror = () => checkConnection();
+  lastReopen = performance.now();
+}
+openStream();
 
 let escBusy = false, lightBusy = false, rebooting = false, connected = false;
 // Starts disarmed; the firmware has no arm-state readback.
@@ -173,8 +211,13 @@ async function request(path, timeout = 2500) {
     return await r.text();
   } finally { clearTimeout(timer); }
 }
+// Used while rebooting: true while the controller still answers.
 async function alive() {
-  try { await request("/state", 1500); return true; } catch (_) { return false; }
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 1500);
+  try { const r = await fetch("/", {method:"HEAD", cache:"no-store", signal:ctl.signal}); return r.ok; }
+  catch (_) { return false; }
+  finally { clearTimeout(timer); }
 }
 function controls() {
   $("btn").disabled = !connected || lightBusy || rebooting;
@@ -186,6 +229,12 @@ function connection(ok) {
   $("connection").dataset.state = ok ? "online" : "offline";
   $("connection-text").textContent = ok ? "Device connected" : rebooting ? "Reconnecting…" : "Device unavailable";
   controls();
+}
+// Connected means the stream is open and the controller has sent something recently.
+function checkConnection() {
+  const ok = !!stream && stream.readyState === EventSource.OPEN && lastStreamMsg > 0 && performance.now() - lastStreamMsg < STREAM_STALE_MS;
+  connection(ok);
+  return ok;
 }
 function setEsc(on) {
   armState = on;
@@ -202,7 +251,7 @@ $("btn").addEventListener("click", async () => {
   if (lightBusy || rebooting) return;
   lightBusy = true; controls(); $("msg").textContent = "";
   $("btn").setAttribute("aria-busy", "true");
-  try { showLight(await request("/toggle")); }
+  try { showLight(await request("/acc/light/toggle")); }
   catch (_) { $("state").textContent = "Unknown"; $("lamp").classList.remove("on"); $("msg").textContent = "Light change unconfirmed. Check the light before retrying."; }
   finally { lightBusy = false; $("btn").removeAttribute("aria-busy"); controls(); }
 });
@@ -220,18 +269,6 @@ function fmtUptime(s) {
   const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
   return [d && d + "d", (d || h) && h + "h", (d || h || m) && m + "m", !d && s % 60 + "s"].filter(Boolean).join(" ");
 }
-// Reads the light state; this doubles as the connection check.
-async function pollState() {
-  try {
-    showLight(await request("/state"));
-    connection(true);
-    return true;
-  } catch (_) {
-    $("state").textContent = "Unknown"; $("lamp").classList.remove("on");
-    connection(false);
-    return false;
-  }
-}
 $("reboot").addEventListener("click", async () => {
   if (rebooting) return;
   if (!window.confirm("Restart the controller? The console will briefly disconnect.")) return;
@@ -243,27 +280,18 @@ $("reboot").addEventListener("click", async () => {
   const start = Date.now(); let back = false;
   // Wait for it to drop off the network first (up to 5 s) so a slow shutdown isn't mistaken for a finished reboot.
   while (Date.now() - start < 5000 && await alive()) await sleep(300);
+  openStream(); lastStreamMsg = 0;   // only a message from the restarted controller counts as reconnected
   while (Date.now() - start < 60000) {
-    if (await pollState()) { back = true; break; }
-    await sleep(1000);
+    if (checkConnection()) { back = true; break; }
+    await sleep(500);
   }
   if (back) { setEsc(false); $("esc-msg").textContent = ""; } // the ESC boots disarmed
   $("reboot-msg").textContent = back ? "Controller reconnected." : "Reconnect to the controller Wi-Fi and check power.";
   $("reboot-msg").classList.toggle("ok", back);
   rebooting = false; $("reboot").removeAttribute("aria-busy"); $("reboot").textContent = "Reboot ESP32"; controls();
 });
-(async function statusLoop() {
-  for (;;) {
-    if (!document.hidden && !rebooting) {
-      if (!lightBusy) await pollState();
-      tickMonitor();
-    }
-    await sleep(STATUS_INTERVAL_MS);
-  }
-})();
 
-// ---- Flight data: live attitude and motor outputs over server-sent events ----
-const FLIGHT_STREAM_URL = "/events";  // AsyncEventSource path on the ESP32
+// ---- Flight data: live attitude and motor outputs ----
 const FLIGHT_EVENT = "flightData";    // event name passed to events.send()
 const FLIGHT_STALE_MS = 2000;         // no message for this long = stream stalled
 const MOTOR_PWM_MIN = 1000, MOTOR_PWM_MAX = 2000;                // ESC pulse range, µs
@@ -323,8 +351,8 @@ function handleFlightLine(line) {
   }
 }
 let rateCount = 0;   // messages received since the last rate reading
-const stream = new EventSource(FLIGHT_STREAM_URL);   // one connection carries flightData, temperature and monitoringData
-stream.addEventListener(FLIGHT_EVENT, e => {
+onStream(FLIGHT_EVENT, e => {
+  noteAlive();
   flight.last = performance.now();
   rateCount++;
   // Lag: how much later than its best case a message arrives, using the ESP32's millis() sent as the event id.
@@ -523,121 +551,256 @@ function tickMonitor() {
   $("updated").textContent = !connected ? "Device unavailable" : !mon.at ? "Awaiting device"
     : fresh ? (age < 2 ? "Updated just now" : "Updated " + age + " s ago") : "Telemetry stalled";
 }
-stream.addEventListener(TEMP_EVENT, e => {
+onStream(TEMP_EVENT, e => {
+  noteAlive();
   const m = /temp:\s*(-?\d+)/i.exec(e.data);
   if (m) { mon.temp = Number(m[1]); mon.tempAt = performance.now(); tickMonitor(); }
 });
-stream.addEventListener(MONITOR_EVENT, e => {
+onStream(MONITOR_EVENT, e => {
+  noteAlive();
   for (const line of String(e.data).split("\n")) if (line.trim()) handleMonitorLine(line.trim());
 });
-</script>
-<script>
-// ---- Vision window (added): camera image, bounding boxes and a center crosshair ----
-(function () {
-  // Frames come from the Web-ESP relay as binary WebSocket messages:
-  //   [u32 LE jsonLen][json][jpeg]   json = {"boxes":[[x,y,w,h,score,target],...],"classes":[[target,score],...],"fps":..,"inf":..}
-  // If this page is served by a different device than the relay, use e.g. "ws://192.168.4.1/ws".
-  const VISION_WS_URL = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws";
-  const LABELS = ["person"];          // class names for your model, by index
-  const STALE_MS = 3000;              // no frame for this long = stream stalled
-  const COLORS = ["#ff5252", "#40c4ff", "#69f0ae", "#ffd740", "#e040fb", "#ff6e40"];
 
-  const q = id => document.getElementById(id);
-  const cv = q("vision-canvas"), ctx = cv.getContext("2d");
-  let ws, pending = null, busy = false, lastRx = 0, tag = "", retry = 1000;
+// ---- Attachments: what is installed decides which panels show ----
+// Each module has a fixed address on the controller's Wi-Fi network. The light module is wired
+// to the controller and has no address. "health" names the controller's response timer for it.
+const MODULES = {
+  LIGHT:         {label: "Light module",         ip: null,           health: null},
+  GROVE_AI:      {label: "Grove AI module",      ip: "192.168.4.10", health: "ai"},
+  PORTENTA_AI:   {label: "Portenta AI module",   ip: "192.168.4.11", health: "ai"},
+  ENVIRONMENTAL: {label: "Environmental module", ip: "192.168.4.20", health: "env"},
+};
+const AI_KEYS = ["GROVE_AI", "PORTENTA_AI"];
+const VISION_PATH = "/vision/img";          // JPEG of the latest frame, served by each AI module
+const VISION_GAP_MS = 150;                  // pause between frames
+const VISION_RETRY_MS = 1500;               // wait after a failed frame
+const VISION_TIMEOUT_MS = 4000;             // give up on a frame after this long
+const VISION_STALE_MS = 3000;               // no frame for this long = stream stalled
+const AI_DELTA_FRESH_MS = 3000;             // show the target offset while it is newer than this
+const ENV_PATH = "/env/data";               // plain-text reading, served by the environmental module
+const ENV_POLL_MS = 2000, ENV_STALE_MS = 6000;
+const MODULE_TIMEOUT_MS = 15000;            // same limit the controller uses
 
-  function idle() {
-    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, cv.width, cv.height);
-    ctx.fillStyle = "#8a8a8a"; ctx.font = "12px system-ui, sans-serif"; ctx.textBaseline = "alphabetic";
-    ctx.fillText("Waiting for camera…", 12, cv.height - 12);
+const att = {ports: ["NONE", "NONE"], got: false};   // index 0 = port 1, index 1 = port 2
+const health = {ai: null, env: null};                // {state, ageMs, at} from the controller's status events
+const aiDelta = {dx: 0, dy: 0, at: 0};
+
+const hasModule = type => att.ports.includes(type);
+function portLabel(type) {
+  const p = att.ports.flatMap((t, i) => t === type ? [i + 1] : []);
+  return p.length ? (p.length > 1 ? "Ports " : "Port ") + p.join(" · ") : "";
+}
+function fmtAge(ms) {
+  return ms < 1000 ? "just now" : ms < 10000 ? (ms / 1000).toFixed(1) + " s ago" : Math.round(ms / 1000) + " s ago";
+}
+
+// -- Vision panels, one per AI module type; shown only when that module is installed --
+const visionPanels = {};
+for (const key of AI_KEYS) {
+  const el = $("vision-tpl").content.firstElementChild.cloneNode(true);
+  const v = {
+    key, mod: MODULES[key], el, cv: el.querySelector("canvas"), view: el.querySelector(".vision-view"),
+    list: el.querySelector(".vision-list"), tag: el.querySelector(".v-tag"), meta: el.querySelector(".v-meta"),
+    running: false, timer: 0, lastRx: 0, rtt: 0, frames: 0, framesPrev: 0, tickAt: performance.now(), fps: 0, w: 0, h: 0,
+  };
+  el.querySelector(".v-title").textContent = v.mod.label.replace(" module", "") + " camera";
+  $("flight-panel").before(el);
+  visionPanels[key] = v;
+  visionIdle(v);
+}
+function visionIdle(v) {
+  const ctx = v.cv.getContext("2d");
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, v.cv.width, v.cv.height);
+  ctx.fillStyle = "#8a8a8a"; ctx.font = "12px system-ui, sans-serif"; ctx.textBaseline = "alphabetic";
+  ctx.fillText("Waiting for camera…", 12, v.cv.height - 12);
+}
+function crosshair(ctx, cx, cy, W, lw, color) {
+  const arm = W * 0.06, gap = W * 0.015;
+  const cross = (style, width) => {
+    ctx.strokeStyle = style; ctx.lineWidth = width; ctx.beginPath();
+    ctx.moveTo(cx - arm, cy); ctx.lineTo(cx - gap, cy); ctx.moveTo(cx + gap, cy); ctx.lineTo(cx + arm, cy);
+    ctx.moveTo(cx, cy - arm); ctx.lineTo(cx, cy - gap); ctx.moveTo(cx, cy + gap); ctx.lineTo(cx, cy + arm);
+    ctx.stroke();
+  };
+  cross("rgba(0,0,0,.65)", lw + 2);   // dark outline so it stays visible on any image
+  cross(color, lw);
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(cx, cy, lw * .8, 0, 7); ctx.fill();
+}
+const deltaFresh = () => aiDelta.at && performance.now() - aiDelta.at < AI_DELTA_FRESH_MS;
+const signed = n => (n > 0 ? "+" : "") + n;
+function visionDraw(v, img) {
+  const cv = v.cv, ctx = cv.getContext("2d");
+  if (cv.width !== img.naturalWidth || cv.height !== img.naturalHeight) { cv.width = img.naturalWidth; cv.height = img.naturalHeight; }
+  const W = v.w = cv.width, H = v.h = cv.height, cx = W / 2, cy = H / 2, lw = Math.max(2, W / 200);
+  ctx.drawImage(img, 0, 0);
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ffffff";
+  if (deltaFresh()) {   // target point = image centre + the offset reported to the controller
+    const tx = Math.min(W, Math.max(0, cx + aiDelta.dx)), ty = Math.min(H, Math.max(0, cy + aiDelta.dy));
+    ctx.strokeStyle = "rgba(0,0,0,.65)"; ctx.lineWidth = lw + 2; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tx, ty); ctx.stroke();
+    ctx.strokeStyle = "#ff5252"; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tx, ty); ctx.stroke();
+    ctx.fillStyle = "#ff5252"; ctx.strokeStyle = "rgba(0,0,0,.65)"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(tx, ty, lw * 2.2, 0, 7); ctx.stroke(); ctx.fill();
   }
-  idle();
+  crosshair(ctx, cx, cy, W, lw, accent);   // drawn last so it sits on top
+  visionList(v);
+  v.meta.textContent = `Last frame: ${W}×${H} · fetched in ${Math.round(v.rtt)} ms`;
+}
+function visionList(v) {
+  const rows = [];
+  if (deltaFresh()) rows.push(["#ff5252", "Target offset", `Δx ${signed(Math.round(aiDelta.dx))}  Δy ${signed(Math.round(aiDelta.dy))}`]);
+  else rows.push(["", "No target data", ""]);
+  rows.push(["", "Address", v.mod.ip]);
+  v.list.replaceChildren(...rows.map(([c, a, b]) => {
+    const li = document.createElement("li"), sp = document.createElement("span");
+    if (c) li.style.setProperty("--c", c);
+    li.append(a); sp.textContent = b; li.append(sp);
+    return li;
+  }));
+}
+function visionNext(v, delay) { clearTimeout(v.timer); v.timer = setTimeout(() => visionFetch(v), delay); }
+function visionFetch(v) {
+  if (!v.running) return;
+  if (document.hidden || rebooting) return visionNext(v, 1000);
+  const img = new Image(), t0 = performance.now();
+  let done = false;
+  const finish = ok => {
+    if (done) return; done = true; clearTimeout(guard);
+    if (!v.running) return;
+    if (ok) { v.rtt = performance.now() - t0; v.lastRx = performance.now(); v.frames++; visionDraw(v, img); visionNext(v, VISION_GAP_MS); }
+    else visionNext(v, VISION_RETRY_MS);
+  };
+  const guard = setTimeout(() => { img.onload = img.onerror = null; img.src = ""; finish(false); }, VISION_TIMEOUT_MS);
+  img.onload = () => finish(true);
+  img.onerror = () => finish(false);
+  img.src = "http://" + v.mod.ip + VISION_PATH + "?t=" + Date.now();   // cache-buster so every poll gets a fresh frame
+}
+function visionStart(v) { if (v.running) return; v.running = true; visionNext(v, 0); }
+function visionStop(v) {
+  if (!v.running) return;
+  v.running = false; clearTimeout(v.timer); v.lastRx = 0; v.frames = v.framesPrev = 0;
+  v.view.classList.add("stale"); visionIdle(v);
+}
 
-  function connect() {
-    ws = new WebSocket(VISION_WS_URL);
-    ws.binaryType = "arraybuffer";
-    ws.onopen = () => { retry = 1000; };
-    ws.onclose = () => { setTimeout(connect, retry); retry = Math.min(retry * 2, 8000); };
-    ws.onmessage = e => {
-      if (document.hidden || typeof e.data === "string") return;   // skip work in background tabs
-      pending = e.data;                                            // keep only the newest frame
-      if (!busy) render();
-    };
+// -- Environment panel: polls the sensor's text endpoint --
+const env = {running: false, timer: 0, text: "", at: 0, ok: false};
+function envStart() { if (env.running) return; env.running = true; envPoll(); }
+function envStop() { env.running = false; clearTimeout(env.timer); env.ok = false; env.at = 0; env.text = ""; $("env-text").textContent = "Waiting for data…"; }
+async function envPoll() {
+  if (!env.running) return;
+  if (!document.hidden && !rebooting) {
+    try {
+      env.text = await request("http://" + MODULES.ENVIRONMENTAL.ip + ENV_PATH, 2500);
+      env.at = performance.now(); env.ok = true;
+      $("env-text").textContent = env.text.trim() || "(empty reading)";
+    } catch (_) { env.ok = false; }
+    tickAttachments();
+  }
+  if (env.running) env.timer = setTimeout(envPoll, ENV_POLL_MS);
+}
+
+// -- Show or hide panels from the installed attachments --
+function balanceGrid() {   // keep the two-column grid tidy: a lone half-width panel on the last row spans the full width
+  const halves = [...document.querySelectorAll(".panel.half")].filter(p => !p.hidden);
+  halves.forEach(p => p.classList.remove("wide"));
+  if (halves.length % 2) halves[halves.length - 1].classList.add("wide");
+}
+function applyAttachments() {
+  $("light-panel").hidden = !hasModule("LIGHT");
+  $("light-port").textContent = portLabel("LIGHT");
+
+  const envOn = hasModule("ENVIRONMENTAL");
+  $("env-panel").hidden = !envOn;
+  $("env-port").textContent = portLabel("ENVIRONMENTAL");
+  $("env-addr").textContent = MODULES.ENVIRONMENTAL.ip;
+  envOn ? envStart() : envStop();
+
+  for (const key of AI_KEYS) {
+    const v = visionPanels[key], on = hasModule(key);
+    v.el.hidden = !on;
+    v.el.querySelector(".v-eyebrow").textContent = "Attachment · " + portLabel(key) + " · " + v.mod.ip;
+    on ? visionStart(v) : visionStop(v);
   }
 
-  async function render() {
-    busy = true;
-    while (pending) {
-      const buf = pending; pending = null;
-      try {
-        const jl = new DataView(buf).getUint32(0, true);
-        const meta = JSON.parse(new TextDecoder().decode(new Uint8Array(buf, 4, jl)));
-        const bmp = await createImageBitmap(new Blob([new Uint8Array(buf, 4 + jl)], {type: "image/jpeg"}));
-        draw(bmp, meta);
-        bmp.close();
-        lastRx = performance.now();
-      } catch (err) { console.warn("Bad vision frame", err); }
+  const none = att.ports.every(t => t === "NONE");
+  $("no-attach").hidden = att.got && !none;
+  $("no-attach-head").textContent = att.got ? "No attachments installed" : "Scanning…";
+  $("no-attach-text").textContent = att.got ? "Plug a module into either port and it will appear here." : "Waiting for the controller’s attachment scan.";
+  balanceGrid();
+}
+
+// -- Module table in the system status widget --
+function linkState(key) {
+  const h = health[key];
+  if (!connected || !h) return {text: "—", cls: "", age: null};
+  if (h.state === "WAITING") return {text: "Waiting", cls: "", age: null};
+  const age = h.ageMs + (performance.now() - h.at);   // the controller's age, kept ticking between status events
+  return age > MODULE_TIMEOUT_MS ? {text: "Timeout", cls: "bad", age} : {text: "OK", cls: "ok", age};
+}
+function renderModules() {
+  if (!att.got) { $("modules").innerHTML = '<tr class="empty"><td colspan="5">Waiting for attachment scan…</td></tr>'; return; }
+  $("modules").innerHTML = att.ports.map((type, i) => {
+    const port = "Port " + (i + 1);
+    if (type === "NONE") return `<tr class="empty"><td>${port}</td><td>Empty</td><td>—</td><td>—</td><td>—</td></tr>`;
+    const mod = MODULES[type] || {label: type, ip: null, health: null};
+    if (!mod.health) return `<tr><td>${port}</td><td>${esc(mod.label)}</td><td>${mod.ip ? esc(mod.ip) : "Wired"}</td><td><span class="pill ok">Detected</span></td><td>n/a</td></tr>`;
+    const l = linkState(mod.health);
+    return `<tr><td>${port}</td><td>${esc(mod.label)}</td><td>${esc(mod.ip)}</td><td><span class="pill ${l.cls}">${l.text}</span></td><td>${l.age == null ? "—" : fmtAge(l.age)}</td></tr>`;
+  }).join("");
+}
+
+// Runs once a second and whenever the controller reports: ages, tags and stale markers.
+function tickAttachments() {
+  const now = performance.now();
+  renderModules();
+  if (!$("env-panel").hidden) {
+    const fresh = env.ok && now - env.at < ENV_STALE_MS;
+    $("env-text").classList.toggle("stale", !fresh);
+    $("env-meta").textContent = !env.at ? "Last update: —" : fresh ? "Updated " + fmtAge(now - env.at) : "Sensor unreachable · last update " + fmtAge(now - env.at);
+  }
+  for (const v of Object.values(visionPanels)) {
+    if (v.el.hidden) continue;
+    const secs = (now - v.tickAt) / 1000;
+    if (secs >= 0.9) { v.fps = (v.frames - v.framesPrev) / secs; v.framesPrev = v.frames; v.tickAt = now; }
+    const live = v.lastRx && now - v.lastRx < VISION_STALE_MS;
+    v.view.classList.toggle("stale", !live);
+    v.tag.textContent = !v.lastRx ? "Awaiting stream" : !live ? "Stream stalled" : `Live · ${v.fps.toFixed(1)} fps`;
+    visionList(v);
+  }
+}
+
+// -- Controller events: installed attachments, module response timers, target offset --
+onStream("attachments", e => {   // "att1: LIGHT, att2: NONE"
+  noteAlive();
+  const m = /att1:\s*(\w+)\s*,\s*att2:\s*(\w+)/i.exec(e.data);
+  if (!m) return;
+  att.ports = [m[1].toUpperCase(), m[2].toUpperCase()]; att.got = true;
+  applyAttachments(); renderModules();
+});
+function parseHealth(data, key) {   // "env: OK (3200 ms since last)", "ai: WAITING (no contact yet)", "ai: TIMEOUT (16000 ms since last)"
+  const m = /:\s*(OK|TIMEOUT|WAITING)(?:\s*\(\s*(\d+)\s*ms)?/i.exec(data);
+  if (!m) return;
+  health[key] = {state: m[1].toUpperCase(), ageMs: m[2] != null ? Number(m[2]) : null, at: performance.now()};
+  renderModules();
+}
+onStream("envHealth", e => { noteAlive(); parseHealth(e.data, "env"); });
+onStream("aiHealth",  e => { noteAlive(); parseHealth(e.data, "ai"); });
+onStream("aiData", e => {   // optional, "dx: 1.5, dy: -0.8": the correction the AI module just reported
+  noteAlive();
+  const m = /dx\s*[:=]\s*(-?\d+(?:\.\d+)?)\D+dy\s*[:=]\s*(-?\d+(?:\.\d+)?)/i.exec(e.data);
+  if (m) { aiDelta.dx = Number(m[1]); aiDelta.dy = Number(m[2]); aiDelta.at = performance.now(); }
+});
+
+// ---- Status loop: connection indicator, telemetry ages and module table (started last) ----
+(async function statusLoop() {
+  for (;;) {
+    if (!document.hidden && !rebooting) {
+      // The stream reconnects by itself, but if it stays silent for a while open a fresh one.
+      if (!checkConnection() && performance.now() - lastReopen > 10000) openStream();
+      tickMonitor();
+      tickAttachments();
     }
-    busy = false;
+    await sleep(STATUS_INTERVAL_MS);
   }
-
-  function crosshair(cx, cy, W, lw, color) {
-    const arm = W * 0.06, gap = W * 0.015;
-    const cross = (style, width) => {
-      ctx.strokeStyle = style; ctx.lineWidth = width; ctx.beginPath();
-      ctx.moveTo(cx - arm, cy); ctx.lineTo(cx - gap, cy); ctx.moveTo(cx + gap, cy); ctx.lineTo(cx + arm, cy);
-      ctx.moveTo(cx, cy - arm); ctx.lineTo(cx, cy - gap); ctx.moveTo(cx, cy + gap); ctx.lineTo(cx, cy + arm);
-      ctx.stroke();
-    };
-    cross("rgba(0,0,0,.65)", lw + 2);   // dark outline so it stays visible on any image
-    cross(color, lw);
-    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(cx, cy, lw * .8, 0, 7); ctx.fill();
-  }
-
-  function draw(bmp, m) {
-    if (cv.width !== bmp.width || cv.height !== bmp.height) { cv.width = bmp.width; cv.height = bmp.height; }
-    const W = cv.width, H = cv.height, cx = W / 2, cy = H / 2;
-    const lw = Math.max(2, W / 200), fs = Math.max(11, W / 22);
-    ctx.drawImage(bmp, 0, 0);
-    ctx.lineWidth = lw; ctx.font = fs + "px system-ui, sans-serif"; ctx.textBaseline = "top";
-
-    const list = q("vision-list");
-    const rows = [];
-    for (const [x, y, w, h, s, t] of (m.boxes || [])) {
-      const c = COLORS[t % COLORS.length], name = LABELS[t] ?? "class " + t;
-      const left = x - w / 2, top = y - h / 2;                     // x,y are the box centre
-      ctx.strokeStyle = c; ctx.strokeRect(left, top, w, h);
-      const label = name + " " + s + "%", tw = ctx.measureText(label).width + 6, ly = Math.max(0, top - fs - 2);
-      ctx.fillStyle = c; ctx.fillRect(left, ly, tw, fs + 2);
-      ctx.fillStyle = "#000"; ctx.fillText(label, left + 3, ly + 1);
-      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, lw * 1.5, 0, 7); ctx.fill();   // box centre
-      const dx = Math.round(x - cx), dy = Math.round(y - cy), sg = n => (n > 0 ? "+" : "") + n;
-      rows.push([c, name + " " + s + "%", "Δx " + sg(dx) + "  Δy " + sg(dy)]);           // offset from crosshair, +x right, +y down
-    }
-    for (const [t, s] of (m.classes || [])) rows.push([COLORS[t % COLORS.length], (LABELS[t] ?? "class " + t) + " " + s + "%", "class"]);
-
-    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ffffff";
-    crosshair(cx, cy, W, lw, accent);                              // drawn last so it sits on top
-
-    list.replaceChildren(...(rows.length ? rows : [["", "No detections", ""]]).map(([c, a, b]) => {
-      const li = document.createElement("li"), sp = document.createElement("span");
-      if (c) li.style.setProperty("--c", c);
-      li.append(a); sp.textContent = b; li.append(sp);
-      return li;
-    }));
-    q("vision-meta").textContent = "Last frame: " + W + "×" + H + " · " + (m.boxes || []).length + " box" + ((m.boxes || []).length === 1 ? "" : "es");
-    q("vision-tag").textContent = tag = "Live · " + m.fps + " fps · inference " + m.inf + " ms";
-    q("vision-view").classList.remove("stale");
-  }
-
-  setInterval(() => {
-    if (lastRx && performance.now() - lastRx > STALE_MS) {
-      q("vision-view").classList.add("stale");
-      if (tag !== "Stream stalled") q("vision-tag").textContent = tag = "Stream stalled";
-    }
-  }, 500);
-
-  connect();
 })();
 </script>
 </body>

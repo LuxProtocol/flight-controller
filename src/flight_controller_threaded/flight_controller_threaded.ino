@@ -58,8 +58,8 @@ struct MotorOutputs {
 // ---------------- PID gains ----------------
 struct PIDGains { float kp, ki, kd; };
 
-PIDGains rollGains  = {1.7, 0.02, 0.35};
-PIDGains pitchGains = {1.7, 0.02, 0.35};
+PIDGains rollGains  = {1.6, 0.02, 0.35};
+PIDGains pitchGains = {1.6, 0.02, 0.35};
 PIDGains yawGains   = {0.6, 0.0, 0.0};
 #define ROLL_TRIM     0.0
 #define PITCH_TRIM    0.0
@@ -510,7 +510,7 @@ void setup() {
     "FlightCtrl",                   // name
     8192,                           // stack size (bytes) — increase if stack overflow occurs
     NULL,                           // parameter
-    5,                              // priority (higher = more urgent; was 1)
+    24,                             // priority (higher = more urgent; was 1)
     &FlightThread,                  // handle
     1                               // core
   );
